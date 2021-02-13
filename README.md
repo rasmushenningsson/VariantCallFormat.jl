@@ -7,6 +7,7 @@
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/master/LICENSE)
 [![Build Status](https://github.com/rasmushenningsson/VCF.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VCF.jl/actions)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VCF.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VCF-jl)
 [![Coverage](https://codecov.io/gh/rasmushenningsson/VCF.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VCF.jl)
 
 
