@@ -1,11 +1,3 @@
-# reader.jl
-# =========
-#
-# A reader for BCF formatted files.
-#
-# This file is a part of BioJulia.
-# License is MIT: https://github.com/BioJulia/GeneticVariation.jl/blob/master/LICENSE
-
 struct Reader{T<:IO} <: BioCore.IO.AbstractReader
     version::Tuple{UInt8,UInt8}  # (major, minor)
     header::VCF.Header
@@ -59,10 +51,6 @@ Get the header of `reader`.
 function header(reader::Reader)
     return reader.header
 end
-
-# function BioCore.header(reader::Reader)
-#     return header(reader)
-# end
 
 function Base.read!(reader::Reader, record::Record)
     sharedlen = read(reader.stream, UInt32)

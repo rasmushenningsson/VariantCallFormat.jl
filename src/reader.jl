@@ -1,11 +1,3 @@
-# reader.jl
-# =========
-#
-# A reader for VCF formatted files.
-#
-# This file is a part of BioJulia.
-# License is MIT: https://github.com/BioJulia/GeneticVariation.jl/blob/master/LICENSE
-
 mutable struct Reader <: BioCore.IO.AbstractReader
     state::BioCore.Ragel.State
     header::Header
@@ -43,10 +35,6 @@ Get the header of `reader`.
 function header(reader::Reader)
     return reader.header
 end
-
-# function BioCore.header(reader::Reader)
-#     return header(reader)
-# end
 
 # VCF v4.3
 @info "Compiling VCF parser..."

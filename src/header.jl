@@ -1,11 +1,3 @@
-# header.jl
-# =========
-#
-# A representation of the header of a VCF file.
-#
-# This file is a part of BioJulia.
-# License is MIT: https://github.com/BioJulia/GeneticVariation.jl/blob/master/LICENSE
-
 struct Header
     metainfo::Vector{MetaInfo}
     sampleID::Vector{String}
@@ -42,20 +34,6 @@ end
 function Base.iterate(header::Header, i = 1)
     return i > lastindex(header.metainfo) ? nothing : (header.metainfo[i], i + 1)
 end
-
-#=
-function Base.start(header::Header)
-    return 1
-end
-
-function Base.done(header::Header, i)
-    return i > endof(header.metainfo)
-end
-
-function Base.next(header::Header, i)
-    return header.metainfo[i], i + 1
-end
-=#
 
 function Base.findall(header::Header, tag::AbstractString)
     return Base.filter(m -> isequaltag(m, tag), header.metainfo)

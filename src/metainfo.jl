@@ -1,11 +1,3 @@
-# metainfo.jl
-# ===========
-#
-# A representation of metainformation in a VCF file.
-#
-# This file is a part of BioJulia.
-# License is MIT: https://github.com/BioJulia/GeneticVariation.jl/blob/master/LICENSE
-
 mutable struct MetaInfo
     # data and filled range
     data::Vector{UInt8}
