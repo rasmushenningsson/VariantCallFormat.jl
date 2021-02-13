@@ -1,10 +1,13 @@
 # VCF.jl
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/master/LICENSE)
+[![Build Status](https://github.com/rasmushenningsson/VCF.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VCF.jl/actions)
 <!--
 [![Stable documentation](https://img.shields.io/badge/docs-stable-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/stable)
 [![Latest documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/latest)
 -->
+[![Coverage](https://codecov.io/gh/rasmushenningsson/VCF.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VCF.jl)
+
 
 VCF.jl is based on previous work in [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
 Big thanks to the original authors!
