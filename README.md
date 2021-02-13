@@ -25,6 +25,8 @@ Install VCF.jl from the Julia REPL:
 using Pkg
 Pkg.add("VCF")
 ```
+(Note, this doesn't work just yet. But it will soon work when the package has
+been registered in the Julia general package registry.)
 
 ## Further Reading
 [VCF and BCF file format descriptions.](https://samtools.github.io/hts-specs/)
