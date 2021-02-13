@@ -15,6 +15,7 @@ import BioCore:
     header
 
 export
+    BCF,
     header,
     metainfotag,
     metainfoval,
@@ -28,5 +29,8 @@ include("metainfo.jl")
 include("header.jl")
 include("reader.jl")
 include("writer.jl")
+
+
+include("bcf/bcf.jl")
 
 end
