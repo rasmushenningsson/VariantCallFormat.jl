@@ -1,7 +1,7 @@
 ```@meta
-CurrentModule = GeneticVariation
+CurrentModule = VCF
 DocTestSetup = quote
-    using GeneticVariation
+    using VCF
 end
 ```
 
@@ -25,22 +25,22 @@ reader:
 
 ```jlcon
 julia> header(reader)
-GeneticVariation.VCF.Header:
+VCF.Header:
   metainfo tags: fileformat fileDate source reference contig phasing INFO FILTER FORMAT
      sample IDs: NA00001 NA00002 NA00003
 
 julia> findall(header(reader), "FORMAT")
-4-element Array{GeneticVariation.VCF.MetaInfo,1}:
- GeneticVariation.VCF.MetaInfo:
+4-element Array{VCF.MetaInfo,1}:
+ VCF.MetaInfo:
     tag: FORMAT
   value: ID="GT" Number="1" Type="String" Description="Genotype"          
- GeneticVariation.VCF.MetaInfo:
+ VCF.MetaInfo:
     tag: FORMAT
   value: ID="GQ" Number="1" Type="Integer" Description="Genotype Quality"
- GeneticVariation.VCF.MetaInfo:
+ VCF.MetaInfo:
     tag: FORMAT
   value: ID="DP" Number="1" Type="Integer" Description="Read Depth"       
- GeneticVariation.VCF.MetaInfo:
+ VCF.MetaInfo:
     tag: FORMAT
   value: ID="HQ" Number="2" Type="Integer" Description="Haplotype Quality"
 ```
@@ -57,7 +57,7 @@ julia> findall(header(reader), "FORMAT")
 
 ```jlcon
 julia> metainfo = VCF.MetaInfo("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">")
-GeneticVariation.VCF.MetaInfo:
+VCF.MetaInfo:
     tag: FORMAT
   value: ID="GT" Number="1" Type="String" Description="Genotype"
 
@@ -98,7 +98,7 @@ julia> metainfo["ID"]
 
 ```jlcon
 julia> record = VCF.Record("20\t14370\trs6054257\tG\tA\t29\tPASS\tNS=3;DP=14;AF=0.5;DB;H2\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51")
-GeneticVariation.VCF.Record:
+VCF.Record:
    chromosome: 20
      position: 14370
    identifier: rs6054257
