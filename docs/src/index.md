@@ -4,7 +4,7 @@ CurrentModule = VCF
 
 # VCF.jl
 
-[![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/master/LICENSE)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/main/LICENSE)
 
 VCF.jl is based on previous work in [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
 Big thanks to the original authors!
