@@ -1,7 +1,7 @@
 @testset "VCF" begin
     metainfo = VCF.MetaInfo()
     @test !isfilled(metainfo)
-    @test occursin(r"^GeneticVariation.VCF.MetaInfo: <not filled>", repr(metainfo))
+    @test occursin(r"^VCF.MetaInfo: <not filled>", repr(metainfo))
     @test_throws ArgumentError metainfotag(metainfo)
 
     metainfo = VCF.MetaInfo(Vector{UInt8}("##source=foobar1234"))
@@ -30,7 +30,7 @@
 
     record = VCF.Record()
     @test !isfilled(record)
-    @test occursin(r"^GeneticVariation.VCF.Record: <not filled>", repr(record))
+    @test occursin(r"^VCF.Record: <not filled>", repr(record))
     @test_throws ArgumentError VCF.chrom(record)
 
     record = VCF.Record("20\t302\t.\tT\tTA\t999\t.\t.\tGT")
@@ -105,7 +105,7 @@
         @test collect(header) == [
             VCF.MetaInfo("##fileformat=VCFv4.3"),
             VCF.MetaInfo("##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta")]
-        @test startswith(repr(header), "GeneticVariation.VCF.Header:")
+        @test startswith(repr(header), "VCF.Header:")
     end
 
     let header = VCF.Header(["##fileformat=VCFv4.3"], ["Sample1"])
@@ -221,7 +221,7 @@
     @test VCF.genotype(record, 2, "GT") == "0/1"
     @test VCF.genotype(record, 1:2, "GT") == ["0|0", "0/1"]
     @test VCF.genotype(record, :, "GT") == VCF.genotype(record, 1:2, "GT")
-    @test occursin(r"^GeneticVariation.VCF.Record:\n.*", repr(record))
+    @test occursin(r"^VCF.Record:\n.*", repr(record))
 
     @test read!(reader, record) === record
     @test VCF.chrom(record) == "chr2"

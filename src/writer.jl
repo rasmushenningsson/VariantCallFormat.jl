@@ -1,11 +1,3 @@
-# writer.jl
-# =========
-#
-# A writer for VCF formatted files.
-#
-# This file is a part of BioJulia.
-# License is MIT: https://github.com/BioJulia/GeneticVariation.jl/blob/master/LICENSE
-
 mutable struct Writer{T<:IO} <: BioCore.IO.AbstractWriter
     stream::T
 end
