@@ -1,7 +1,6 @@
-name = "GeneticVariation"
-uuid = "9bc6ac9d-e6b2-5f70-b0a8-242a01662520"
-authors = ["Ben J. Ward <benjward@protonmail.com>"]
-version = "0.4.1"
+name = "VCF"
+uuid = "4aa32d9a-e79d-4ae2-bc49-73d041a2fde6"
+version = "0.5.0"
 
 [deps]
 Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"

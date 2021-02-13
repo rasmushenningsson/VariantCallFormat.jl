@@ -60,9 +60,9 @@ function header(reader::Reader)
     return reader.header
 end
 
-function BioCore.header(reader::Reader)
-    return header(reader)
-end
+# function BioCore.header(reader::Reader)
+#     return header(reader)
+# end
 
 function Base.read!(reader::Reader, record::Record)
     sharedlen = read(reader.stream, UInt32)

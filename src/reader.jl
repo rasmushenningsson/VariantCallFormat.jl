@@ -44,9 +44,9 @@ function header(reader::Reader)
     return reader.header
 end
 
-function BioCore.header(reader::Reader)
-    return header(reader)
-end
+# function BioCore.header(reader::Reader)
+#     return header(reader)
+# end
 
 # VCF v4.3
 @info "Compiling VCF parser..."
