@@ -1,11 +1,3 @@
-# record.jl
-# =========
-#
-# Representation of a record of a BCF file.
-#
-# This file is a part of BioJulia.
-# License is MIT: https://github.com/BioJulia/GeneticVariation.jl/blob/master/LICENSE
-
 mutable struct Record
     # data and filled range
     data::Vector{UInt8}
