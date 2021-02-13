@@ -2,5 +2,5 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
-Manifest.toml
-/docs/build
+/Manifest.toml
+/docs/build/
