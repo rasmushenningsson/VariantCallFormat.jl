@@ -20,4 +20,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/rasmushenningsson/VCF.jl",
+    devbranch="main",
 )
