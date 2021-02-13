@@ -2,9 +2,9 @@
 
 <!--
 [![Stable documentation](https://img.shields.io/badge/docs-stable-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/stable)
-[![Latest documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/latest)
 -->
 
+[![Dev documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/dev)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/main/LICENSE)
 [![Build Status](https://github.com/rasmushenningsson/VCF.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VCF.jl/actions)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VCF.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VCF-jl)
