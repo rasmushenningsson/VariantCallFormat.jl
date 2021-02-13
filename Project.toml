@@ -1,5 +1,6 @@
 name = "VCF"
 uuid = "4aa32d9a-e79d-4ae2-bc49-73d041a2fde6"
+authors = ["Rasmus Henningsson <rasmus.henningsson@gmail.com>", "Lund University"]
 version = "0.5.0"
 
 [deps]
