@@ -21,5 +21,5 @@ Install VCF.jl from the Julia REPL:
 
 ```julia
 using Pkg
-add("VCF")
+Pkg.add("VCF")
 ```
