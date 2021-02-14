@@ -1,11 +1,11 @@
 # VCF.jl
 
 <!--
-[![Stable documentation](https://img.shields.io/badge/docs-stable-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/stable)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://rasmushenningsson.github.io/VCF.jl/stable)
 -->
 
-[![Dev documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://rasmushenningsson.github.io/VCF.jl/dev)
-[![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/main/LICENSE)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://rasmushenningsson.github.io/VCF.jl/dev)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/rasmushenningsson/VCF.jl/blob/main/LICENSE)
 [![Build Status](https://github.com/rasmushenningsson/VCF.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VCF.jl/actions)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VCF.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VCF-jl)
 [![Coverage](https://codecov.io/gh/rasmushenningsson/VCF.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VCF.jl)
