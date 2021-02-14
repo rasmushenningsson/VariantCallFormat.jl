@@ -485,7 +485,7 @@ function info(record::Record, key::String)::String
 end
 
 function hasinfo(record::Record, key::String)
-    return isfilled(record) && findinfokey(key) > 0
+    return isfilled(record) && findinfokey(record, key) > 0
 end
 
 function findinfokey(record::Record, key::String)

@@ -51,6 +51,7 @@
     @test_throws MissingFieldException VCF.filter(record)
     @test VCF.infokeys(record) == String[]
     @test !VCF.hasinfo(record)
+    @test !VCF.hasinfo(record,"AA")
     @test_throws MissingFieldException VCF.info(record)
     @test VCF.hasformat(record)
     @test VCF.format(record) == ["GT"]
@@ -87,10 +88,14 @@
     record = VCF.Record(record, filter="PASS")
     @test VCF.filter(record) == ["PASS"]
     record = VCF.Record(record, info=Dict("DP" => 20, "AA" => "AT", "DB"=>nothing))
+    @test VCF.hasinfo(record, "DP")
     @test VCF.info(record, "DP") == "20"
+    @test VCF.hasinfo(record, "AA")
     @test VCF.info(record, "AA") == "AT"
+    @test VCF.hasinfo(record, "DB")
     @test VCF.info(record, "DB") == ""
     @test VCF.infokeys(record) == ["DP", "AA", "DB"]
+    @test !VCF.hasinfo(record, "XY")
     record = VCF.Record(record, genotype=[Dict("GT" => "0/0", "DP" => [10,20])])
     @test VCF.format(record) == ["DP", "GT"]
     @test VCF.genotype(record) == [["10,20", "0/0"]]
