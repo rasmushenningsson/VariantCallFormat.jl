@@ -1,4 +1,4 @@
-# The humans responsible for VCF.jl
+# The humans responsible for VariantCallFormat.jl
 
 ## Maintainers
 - Rasmus Henningsson

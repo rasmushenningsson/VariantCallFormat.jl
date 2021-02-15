@@ -1,7 +1,7 @@
 @testset "BCF" begin
     record = BCF.Record()
     @test !isfilled(record)
-    @test occursin(r"^VCF.BCF.Record: <not filled>", repr(record))
+    @test occursin(r"^VariantCallFormat.BCF.Record: <not filled>", repr(record))
     @test_throws ArgumentError BCF.chrom(record)
 
     record = BCF.Record()
@@ -58,7 +58,7 @@
     @test BCF.genotype(record, 1, 10) == [48]
     @test BCF.genotype(record, 2, 9) == [4,3]
     @test BCF.genotype(record, :, 9) == [[2,3],[4,3],[4,4]]
-    @test occursin(r"^VCF.BCF.Record:\n.*", repr(record))
+    @test occursin(r"^VariantCallFormat.BCF.Record:\n.*", repr(record))
     close(reader)
 
     # round-trip test

@@ -1,7 +1,7 @@
 ```@meta
-CurrentModule = VCF
+CurrentModule = VariantCallFormat
 DocTestSetup = quote
-    using VCF
+    using VariantCallFormat
 end
 ```
 
@@ -9,7 +9,7 @@ end
 
 VCF is a text-based file format for representing genetic polymorphism.
 
-VCF files can be read using `VCFReader`, respectively:
+VCF files can be read using `VCF.Reader`, respectively:
 
 ```julia
 reader = VCF.Reader(open("example.vcf", "r"))
@@ -25,27 +25,27 @@ reader:
 
 ```jlcon
 julia> header(reader)
-VCF.Header:
+VariantCallFormat.Header:
   metainfo tags: fileformat fileDate source reference contig phasing INFO FILTER FORMAT
      sample IDs: NA00001 NA00002 NA00003
 
 julia> findall(header(reader), "FORMAT")
-4-element Array{VCF.MetaInfo,1}:
- VCF.MetaInfo:
+4-element Array{VariantCallFormat.MetaInfo,1}:
+ VariantCallFormat.MetaInfo:
     tag: FORMAT
   value: ID="GT" Number="1" Type="String" Description="Genotype"          
- VCF.MetaInfo:
+ VariantCallFormat.MetaInfo:
     tag: FORMAT
   value: ID="GQ" Number="1" Type="Integer" Description="Genotype Quality"
- VCF.MetaInfo:
+ VariantCallFormat.MetaInfo:
     tag: FORMAT
   value: ID="DP" Number="1" Type="Integer" Description="Read Depth"       
- VCF.MetaInfo:
+ VariantCallFormat.MetaInfo:
     tag: FORMAT
   value: ID="HQ" Number="2" Type="Integer" Description="Haplotype Quality"
 ```
 
-`VCF.MetaInfo` variables in the header support the following accessors:
+`VariantCallFormat.MetaInfo` variables in the header support the following accessors:
 
 | Accessor      | Description                          |
 | :-------      | :----------                          |
@@ -56,8 +56,8 @@ julia> findall(header(reader), "FORMAT")
 | `[<key>]`     | value of a field with `key`          |
 
 ```jlcon
-julia> metainfo = VCF.MetaInfo("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">")
-VCF.MetaInfo:
+julia> metainfo = VariantCallFormat.MetaInfo("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">")
+VariantCallFormat.MetaInfo:
     tag: FORMAT
   value: ID="GT" Number="1" Type="String" Description="Genotype"
 
@@ -98,7 +98,7 @@ julia> metainfo["ID"]
 
 ```jlcon
 julia> record = VCF.Record("20\t14370\trs6054257\tG\tA\t29\tPASS\tNS=3;DP=14;AF=0.5;DB;H2\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51")
-VCF.Record:
+VariantCallFormat.Record:
    chromosome: 20
      position: 14370
    identifier: rs6054257

@@ -1,14 +1,14 @@
-using VCF
+using VariantCallFormat
 using Documenter
 
 makedocs(;
-    modules=[VCF],
+    modules=[VariantCallFormat],
     authors="Kenta Sato, Ben J. Ward, Rasmus Henningsson, The BioJulia Organisation and other contributors.",
-    repo="https://github.com/rasmushenningsson/VCF.jl/blob/{commit}{path}#L{line}",
-    sitename="VCF.jl",
+    repo="https://github.com/rasmushenningsson/VariantCallFormat.jl/blob/{commit}{path}#L{line}",
+    sitename="VariantCallFormat.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://rasmushenningsson.github.io/VCF.jl",
+        canonical="https://rasmushenningsson.github.io/VariantCallFormat.jl",
         assets=String[],
     ),
     pages=[
@@ -19,6 +19,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/rasmushenningsson/VCF.jl",
+    repo="github.com/rasmushenningsson/VariantCallFormat.jl",
     devbranch="main",
 )

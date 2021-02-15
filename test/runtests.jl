@@ -1,7 +1,7 @@
-module TestVCF
+module TestVariantCallFormat
 
 using Test
-using VCF
+using VariantCallFormat
 
 import BioCore: isfilled
 import BioCore.Exceptions.MissingFieldException

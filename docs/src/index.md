@@ -1,32 +1,32 @@
 ```@meta
-CurrentModule = VCF
+CurrentModule = VariantCallFormat
 ```
 
-# VCF.jl
+# VariantCallFormat.jl
 
-[![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VCF.jl/blob/main/LICENSE)
-[![Build Status](https://github.com/rasmushenningsson/VCF.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VCF.jl/actions)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VCF.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VCF-jl)
-[![Coverage](https://codecov.io/gh/rasmushenningsson/VCF.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VCF.jl)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VariantCallFormat.jl/blob/main/LICENSE)
+[![Build Status](https://github.com/rasmushenningsson/VariantCallFormat.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VariantCallFormat.jl/actions)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VariantCallFormat.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VCF-jl)
+[![Coverage](https://codecov.io/gh/rasmushenningsson/VariantCallFormat.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VariantCallFormat.jl)
 
-VCF.jl is based on previous work in [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
+VariantCallFormat.jl is based on previous work in [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
 Big thanks to the original authors!
 
 ## Description
 
-VCF.jl provides read/write functionality for VCF (Variant Call Format) files as
-well as for its binary sister format BCF.
+VariantCallFormat.jl provides read/write functionality for VCF files as well as
+for its binary sister format BCF.
 
 VCF files are use ubiquitously in bioinformatics to represent genetic variants.
 
 
 ## Installation
 
-Install VCF.jl from the Julia REPL:
+Install VariantCallFormat.jl from the Julia REPL:
 
 ```julia
 using Pkg
-Pkg.add("VCF")
+Pkg.add("VariantCallFormat")
 ```
 
 ## Further Reading
