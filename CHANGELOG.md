@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Created VariantCallFormat.jl package, based on [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
 - Added Project.toml.
+
+## Changed
 - Removed functionality not related to VCF/BCF file IO.
 - Removed several dependencies.
+- Fixed hasinfo(record, key) bug
 
 ## [0.4.0] - 2018-11-22
 ### Added
