@@ -44,6 +44,8 @@ module VCF
 	const id = VariantCallFormat.id
 	const info = VariantCallFormat.info
 	const infokeys = VariantCallFormat.infokeys
+	const initialize! = VariantCallFormat.initialize!
+	const isfilled = VariantCallFormat.isfilled
 	const MetaInfo = VariantCallFormat.MetaInfo
 	const pos = VariantCallFormat.pos
 	const qual = VariantCallFormat.qual
