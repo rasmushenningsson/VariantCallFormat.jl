@@ -11,6 +11,8 @@ export
     VCF,
     BCF,
     header,
+    metainfo,
+    sampleids,
     metainfotag,
     metainfoval,
     isfilled,

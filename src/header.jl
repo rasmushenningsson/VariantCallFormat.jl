@@ -1,10 +1,6 @@
 struct Header
     metainfo::Vector{MetaInfo}
     sampleID::Vector{String}
-
-    function Header(metainfo::Vector{MetaInfo}, sampleID::Vector{String})
-        return new(metainfo, sampleID)
-    end
 end
 
 """
@@ -23,31 +19,19 @@ function Header(metainfo::Vector, sampleID::Vector)
     return Header(convert(Vector{MetaInfo}, metainfo), convert(Vector{String}, sampleID))
 end
 
-function Base.eltype(::Type{Header})
-    return MetaInfo
-end
+metainfo(header::Header) = header.metainfo
+metainfo(header::Header, tag::AbstractString) = Base.filter(m -> isequaltag(m, tag), header.metainfo)
+sampleids(header::Header) = header.sampleID
 
-function Base.length(header::Header)
-    return length(header.metainfo)
-end
 
-function Base.iterate(header::Header, i = 1)
-    return i > lastindex(header.metainfo) ? nothing : (header.metainfo[i], i + 1)
-end
+import Base: eltype, length, iterate, pushfirst!, push!, findall # needed for deprecations to work
+@deprecate eltype(::Type{Header}) MetaInfo false
+@deprecate length(header::Header) length(metainfo(header)) false
+@deprecate iterate(header::Header, i=1) iterate(metainfo(header),i) false
+@deprecate pushfirst!(header::Header, minfo) pushfirst!(metainfo(header), minfo) false
+@deprecate push!(header::Header, minfo) push!(metainfo(header), minfo) false
+@deprecate findall(header::Header, tag::AbstractString) metainfo(header,tag) false
 
-function Base.findall(header::Header, tag::AbstractString)
-    return Base.filter(m -> isequaltag(m, tag), header.metainfo)
-end
-
-function Base.pushfirst!(header::Header, metainfo)
-    pushfirst!(header.metainfo, convert(MetaInfo, metainfo))
-    return header
-end
-
-function Base.push!(header::Header, metainfo)
-    push!(header.metainfo, convert(MetaInfo, metainfo))
-    return header
-end
 
 function Base.show(io::IO, header::Header)
     println(io, summary(header), ':')
