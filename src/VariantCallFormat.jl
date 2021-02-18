@@ -19,11 +19,12 @@ export
     isfilled,
     MissingFieldException
 
-include("record.jl")
 include("metainfo.jl")
 include("header.jl")
-include("reader.jl")
-include("writer.jl")
+
+include("vcf/record.jl")
+include("vcf/reader.jl")
+include("vcf/writer.jl")
 
 # This module is here for backwards compatibility and to serve as a way to conveniently access unexported names
 module VCF
