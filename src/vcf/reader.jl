@@ -245,20 +245,20 @@ eval(
             :anchor    => :(BioCore.ReaderHelper.anchor!(stream, p); offset = p - 1)))))
 
 const vcf_record_actions = Dict(
-    :record_chrom        => :(record.chrom = (mark:p-1) .- offset),
-    :record_pos          => :(record.pos = (mark:p-1) .- offset),
-    :record_id           => :(push!(record.id, (mark:p-1) .- offset)),
-    :record_ref          => :(record.ref = (mark:p-1) .- offset),
-    :record_alt          => :(push!(record.alt, (mark:p-1) .- offset)),
-    :record_qual         => :(record.qual = (mark:p-1) .- offset),
-    :record_filter       => :(push!(record.filter, (mark:p-1) .- offset)),
-    :record_info_key     => :(push!(record.infokey, (mark:p-1) .- offset)),
-    :record_format       => :(push!(record.format, (mark:p-1) .- offset)),
-    :record_genotype     => :(push!(record.genotype, UnitRange{Int}[])),
-    :record_genotype_elm => :(push!(record.genotype[end], (mark:p-1) .- offset)),
+    :record_chrom        => :(record.chrom_ = (mark:p-1) .- offset),
+    :record_pos          => :(record.pos_ = (mark:p-1) .- offset),
+    :record_id           => :(push!(record.id_, (mark:p-1) .- offset)),
+    :record_ref          => :(record.ref_ = (mark:p-1) .- offset),
+    :record_alt          => :(push!(record.alt_, (mark:p-1) .- offset)),
+    :record_qual         => :(record.qual_ = (mark:p-1) .- offset),
+    :record_filter       => :(push!(record.filter_, (mark:p-1) .- offset)),
+    :record_info_key     => :(push!(record.infokey_, (mark:p-1) .- offset)),
+    :record_format       => :(push!(record.format_, (mark:p-1) .- offset)),
+    :record_genotype     => :(push!(record.genotype_, UnitRange{Int}[])),
+    :record_genotype_elm => :(push!(record.genotype_[end], (mark:p-1) .- offset)),
     :record              => quote
         BioCore.ReaderHelper.resize_and_copy!(record.data, data, 1:p-1)
-        record.filled = (offset+1:p-1) .- offset
+        record.filled_ = (offset+1:p-1) .- offset
     end,
     :anchor              => :(),
     :mark                => :(mark = p))
@@ -276,7 +276,7 @@ eval(
         merge(vcf_record_actions, Dict(
             :record    => quote
                 BioCore.ReaderHelper.resize_and_copy!(record.data, data, BioCore.ReaderHelper.upanchor!(stream):p-1)
-                record.filled = (offset+1:p-1) .- offset
+                record.filled_ = (offset+1:p-1) .- offset
                 found_record = true
                 @escape
             end,

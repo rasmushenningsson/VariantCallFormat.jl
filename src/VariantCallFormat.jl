@@ -8,7 +8,6 @@ import BioCore.Exceptions: missingerror
 import BufferedStreams
 import BGZFStreams
 
-
 export
     VCF,
     BCF,
@@ -29,6 +28,9 @@ export
 
 include("metainfo.jl")
 include("header.jl")
+
+include("abstractrecord.jl")
+include("mem.jl")
 
 include("vcf/record.jl")
 include("vcf/reader.jl")

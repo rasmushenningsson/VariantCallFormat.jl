@@ -1,4 +1,4 @@
-mutable struct BCFRecord
+mutable struct BCFRecord <: AbstractRecord
     # data and filled range
     data::Vector{UInt8}
     filled::UnitRange{Int}
@@ -658,13 +658,4 @@ function copyvecbody!(dst::Vector{UInt8}, doffset::Int, src::Vector{UInt8}, soff
     end
     copyto!(dst, doffset + 1, src, soffset + 1, n)
     return doffset + n, soffset + n
-end
-
-function memcpy(dst::Ptr, src::Ptr, n::Int)
-    ccall(:memcpy, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), dst, src, n)
-    return nothing
-end
-
-function memcmp(p1::Ptr, p2::Ptr, n::Integer)
-    return ccall(:memcmp, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), p1, p2, n)
 end

@@ -1,18 +1,18 @@
-mutable struct VCFRecord
+mutable struct VCFRecord <: AbstractRecord
     # data and filled range
     data::Vector{UInt8}
-    filled::UnitRange{Int}
+    filled_::UnitRange{Int}
     # indexes
-    chrom::UnitRange{Int}
-    pos::UnitRange{Int}
-    id::Vector{UnitRange{Int}}
-    ref::UnitRange{Int}
-    alt::Vector{UnitRange{Int}}
-    qual::UnitRange{Int}
-    filter::Vector{UnitRange{Int}}
-    infokey::Vector{UnitRange{Int}}
-    format::Vector{UnitRange{Int}}
-    genotype::Vector{Vector{UnitRange{Int}}}
+    chrom_::UnitRange{Int}
+    pos_::UnitRange{Int}
+    id_::Vector{UnitRange{Int}}
+    ref_::UnitRange{Int}
+    alt_::Vector{UnitRange{Int}}
+    qual_::UnitRange{Int}
+    filter_::Vector{UnitRange{Int}}
+    infokey_::Vector{UnitRange{Int}}
+    format_::Vector{UnitRange{Int}}
+    genotype_::Vector{Vector{UnitRange{Int}}}
 end
 
 """
@@ -65,26 +65,26 @@ function Base.convert(::Type{VCFRecord}, str::AbstractString)
 end
 
 function initialize!(record::VCFRecord)
-    record.filled = 1:0
-    record.chrom = 1:0
-    record.pos = 1:0
-    empty!(record.id)
-    record.ref = 1:0
-    empty!(record.alt)
-    record.qual = 1:0
-    empty!(record.filter)
-    empty!(record.infokey)
-    empty!(record.format)
-    empty!(record.genotype)
+    record.filled_ = 1:0
+    record.chrom_ = 1:0
+    record.pos_ = 1:0
+    empty!(record.id_)
+    record.ref_ = 1:0
+    empty!(record.alt_)
+    record.qual_ = 1:0
+    empty!(record.filter_)
+    empty!(record.infokey_)
+    empty!(record.format_)
+    empty!(record.genotype_)
     return record
 end
 
 function isfilled(record::VCFRecord)
-    return !isempty(record.filled)
+    return !isempty(record.filled_)
 end
 
 function datarange(record::VCFRecord)
-    return record.filled
+    return record.filled_
 end
 
 function Base.:(==)(record1::VCFRecord, record2::VCFRecord)
@@ -111,24 +111,24 @@ function VCFRecord(base::VCFRecord;
     buf = IOBuffer()
 
     if chrom == nothing
-        write(buf, base.data[base.chrom])
+        write(buf, base.data[base.chrom_])
     else
         print(buf, string(chrom))
     end
 
     print(buf, '\t')
     if pos == nothing
-        write(buf, base.data[base.pos])
+        write(buf, base.data[base.pos_])
     else
         print(buf, convert(Int, pos))
     end
 
     print(buf, '\t')
     if id == nothing
-        if isempty(base.id)
+        if isempty(base.id_)
             print(buf, '.')
         else
-            for (i, r) in enumerate(base.id)
+            for (i, r) in enumerate(base.id_)
                 if i != 1
                     print(buf, ';')
                 end
@@ -153,17 +153,17 @@ function VCFRecord(base::VCFRecord;
 
     print(buf, '\t')
     if ref == nothing
-        write(buf, base.data[base.ref])
+        write(buf, base.data[base.ref_])
     else
         print(buf, string(ref))
     end
 
     print(buf, '\t')
     if alt == nothing
-        if isempty(base.alt)
+        if isempty(base.alt_)
             print(buf, '.')
         else
-            for (i, r) in enumerate(base.alt)
+            for (i, r) in enumerate(base.alt_)
                 if i != 1
                     print(buf, ';')
                 end
@@ -188,17 +188,17 @@ function VCFRecord(base::VCFRecord;
 
     print(buf, '\t')
     if qual == nothing
-        write(buf, base.data[base.qual])
+        write(buf, base.data[base.qual_])
     else
         print(buf, convert(Float64, qual))
     end
 
     print(buf, '\t')
     if filter == nothing
-        if isempty(base.filter)
+        if isempty(base.filter_)
             print(buf, '.')
         else
-            for (i, r) in enumerate(base.filter)
+            for (i, r) in enumerate(base.filter_)
                 if i != 1
                     print(buf, ';')
                 end
@@ -223,10 +223,10 @@ function VCFRecord(base::VCFRecord;
 
     print(buf, '\t')
     if info == nothing
-        if isempty(base.infokey)
+        if isempty(base.infokey_)
             print(buf, '.')
         else
-            write(buf, base.data[first(base.infokey[1]):last(infovalrange(base, lastindex(base.infokey)))])
+            write(buf, base.data[first(base.infokey_[1]):last(infovalrange(base, lastindex(base.infokey_)))])
         end
     else
         if !isa(info, AbstractDict)
@@ -248,13 +248,13 @@ function VCFRecord(base::VCFRecord;
 
     print(buf, '\t')
     if genotype == nothing
-        if isempty(base.format)
+        if isempty(base.format_)
             print(buf, '.')
         else
-            write(buf, base.data[first(base.format[1]):last(base.format[end])])
+            write(buf, base.data[first(base.format_[1]):last(base.format_[end])])
         end
-        if !isempty(base.genotype)
-            for indiv in base.genotype
+        if !isempty(base.genotype_)
+            for indiv in base.genotype_
                 print(buf, '\t')
                 for (i, r) in enumerate(indiv)
                     if i != 1
@@ -308,17 +308,17 @@ end
 function Base.copy(record::VCFRecord)
     return VCFRecord(
         copy(record.data),
-        record.filled,
-        record.chrom,
-        record.pos,
-        copy(record.id),
-        record.ref,
-        copy(record.alt),
-        record.qual,
-        copy(record.filter),
-        copy(record.infokey),
-        copy(record.format),
-        deepcopy(record.genotype))
+        record.filled_,
+        record.chrom_,
+        record.pos_,
+        copy(record.id_),
+        record.ref_,
+        copy(record.alt_),
+        record.qual_,
+        copy(record.filter_),
+        copy(record.infokey_),
+        copy(record.format_),
+        deepcopy(record.genotype_))
 end
 
 function Base.write(io::IO, record::VCFRecord)
@@ -336,14 +336,14 @@ Get the chromosome name of `record`.
 """
 function chrom(record::VCFRecord)::String
     checkfilled(record)
-    if ismissing(record, record.chrom)
+    if ismissing(record, record.chrom_)
         missingerror(:chrom)
     end
-    return String(record.data[record.chrom])
+    return String(record.data[record.chrom_])
 end
 
 function haschrom(record::VCFRecord)
-    return isfilled(record) && !ismissing(record, record.chrom)
+    return isfilled(record) && !ismissing(record, record.chrom_)
 end
 
 """
@@ -352,15 +352,15 @@ Get the reference position of `record`.
 """
 function pos(record::VCFRecord)::Int
     checkfilled(record)
-    if ismissing(record, record.pos)
+    if ismissing(record, record.pos_)
         missingerror(:pos)
     end
     # TODO: no-copy accessor
-    return parse(Int, String(record.data[record.pos]))
+    return parse(Int, String(record.data[record.pos_]))
 end
 
 function haspos(record::VCFRecord)
-    return isfilled(record) && !ismissing(record, record.pos)
+    return isfilled(record) && !ismissing(record, record.pos_)
 end
 
 """
@@ -369,14 +369,14 @@ Get the identifiers of `record`.
 """
 function id(record::VCFRecord)::Vector{String}
     checkfilled(record)
-    if isempty(record.id)
+    if isempty(record.id_)
         missingerror(:id)
     end
-    return [String(record.data[r]) for r in record.id]
+    return [String(record.data[r]) for r in record.id_]
 end
 
 function hasid(record::VCFRecord)
-    return isfilled(record) && !isempty(record.id)
+    return isfilled(record) && !isempty(record.id_)
 end
 
 """
@@ -385,14 +385,14 @@ Get the reference bases of `record`.
 """
 function ref(record::VCFRecord)::String
     checkfilled(record)
-    if ismissing(record, record.ref)
+    if ismissing(record, record.ref_)
         missingerror(:ref)
     end
-    return String(record.data[record.ref])
+    return String(record.data[record.ref_])
 end
 
 function hasref(record::VCFRecord)
-    return isfilled(record) && !ismissing(record, record.ref)
+    return isfilled(record) && !ismissing(record, record.ref_)
 end
 
 """
@@ -401,14 +401,14 @@ Get the alternate bases of `record`.
 """
 function alt(record::VCFRecord)::Vector{String}
     checkfilled(record)
-    if isempty(record.alt)
+    if isempty(record.alt_)
         missingerror(:alt)
     end
-    return [String(record.data[r]) for r in record.alt]
+    return [String(record.data[r]) for r in record.alt_]
 end
 
 function hasalt(record::VCFRecord)
-    return isfilled(record) && !isempty(record.alt)
+    return isfilled(record) && !isempty(record.alt_)
 end
 
 """
@@ -417,15 +417,15 @@ Get the quality score of `record`.
 """
 function qual(record::VCFRecord)::Float64
     checkfilled(record)
-    if ismissing(record, record.qual)
+    if ismissing(record, record.qual_)
         missingerror(:qual)
     end
     # TODO: no-copy parse
-    return parse(Float64, String(record.data[record.qual]))
+    return parse(Float64, String(record.data[record.qual_]))
 end
 
 function hasqual(record::VCFRecord)
-    return isfilled(record) && !ismissing(record, record.qual)
+    return isfilled(record) && !ismissing(record, record.qual_)
 end
 
 """
@@ -434,14 +434,14 @@ Get the filter status of `record`.
 """
 function filter(record::VCFRecord)::Vector{String}
     checkfilled(record)
-    if isempty(record.filter)
+    if isempty(record.filter_)
         missingerror(:filter)
     end
-    return [String(record.data[r]) for r in record.filter]
+    return [String(record.data[r]) for r in record.filter_]
 end
 
 function hasfilter(record::VCFRecord)
-    return isfilled(record) && !isempty(record.filter)
+    return isfilled(record) && !isempty(record.filter_)
 end
 
 """
@@ -450,11 +450,11 @@ Get the additional information of `record`.
 """
 function info(record::VCFRecord)::Vector{Pair{String,String}}
     checkfilled(record)
-    if isempty(record.infokey)
+    if isempty(record.infokey_)
         missingerror(:info)
     end
     ret = Pair{String,String}[]
-    for (i, key) in enumerate(record.infokey)
+    for (i, key) in enumerate(record.infokey_)
         val = infovalrange(record, i)
         push!(ret, String(record.data[key]) => String(record.data[val]))
     end
@@ -462,7 +462,7 @@ function info(record::VCFRecord)::Vector{Pair{String,String}}
 end
 
 function hasinfo(record::VCFRecord)
-    return isfilled(record) && !isempty(record.infokey)
+    return isfilled(record) && !isempty(record.infokey_)
 end
 
 """
@@ -489,8 +489,8 @@ function hasinfo(record::VCFRecord, key::String)
 end
 
 function findinfokey(record::VCFRecord, key::String)
-    for i in 1:lastindex(record.infokey)
-        if isequaldata(key, record.data, record.infokey[i])
+    for i in 1:lastindex(record.infokey_)
+        if isequaldata(key, record.data, record.infokey_[i])
             return i
         end
     end
@@ -504,14 +504,14 @@ This function returns an empty vector when the INFO field is missing.
 """
 function infokeys(record::VCFRecord)::Vector{String}
     checkfilled(record)
-    return [String(record.data[key]) for key in record.infokey]
+    return [String(record.data[key]) for key in record.infokey_]
 end
 
 # Returns the data range of the `i`-th value.
 function infovalrange(record::VCFRecord, i::Int)
     checkfilled(record)
     data = record.data
-    key = record.infokey[i]
+    key = record.infokey_[i]
     if last(key) + 1 ≤ lastindex(data) && data[last(key)+1] == UInt8('=')
         endpos = something(findnext(isequal(0x3B), data, last(key)+1), 0) # 0x3B is byte equivalent of char ';'.
         if endpos == 0
@@ -530,14 +530,14 @@ Get the genotype format of `record`.
 """
 function format(record::VCFRecord)::Vector{String}
     checkfilled(record)
-    if isempty(record.format)
+    if isempty(record.format_)
         missingerror(:format)
     end
-    return [String(record.data[r]) for r in record.format]
+    return [String(record.data[r]) for r in record.format_]
 end
 
 function hasformat(record::VCFRecord)
-    return isfilled(record) && !isempty(record.format)
+    return isfilled(record) && !isempty(record.format_)
 end
 
 """
@@ -547,8 +547,8 @@ Get the genotypes of `record`.
 function genotype(record::VCFRecord)
     checkfilled(record)
     ret = Vector{String}[]
-    for i in 1:lastindex(record.genotype)
-        push!(ret, genotype_impl(record, i, 1:lastindex(record.format)))
+    for i in 1:lastindex(record.genotype_)
+        push!(ret, genotype_impl(record, i, 1:lastindex(record.format_)))
     end
     return ret
 end
@@ -560,7 +560,7 @@ This is effectively equivalent to `genotype(record)[index]` but more efficient.
 """
 function genotype(record::VCFRecord, index::Integer)
     checkfilled(record)
-    return genotype_impl(record, index, 1:lastindex(record.format))
+    return genotype_impl(record, index, 1:lastindex(record.format_))
 end
 
 """
@@ -607,11 +607,11 @@ function genotype(record::VCFRecord, indexes::AbstractVector{T}, keys::AbstractV
 end
 
 function genotype(record::VCFRecord, ::Colon, key::String)::Vector{String}
-    return genotype(record, 1:lastindex(record.genotype), key)
+    return genotype(record, 1:lastindex(record.genotype_), key)
 end
 
 function findgenokey(record::VCFRecord, key::String)
-    return findfirst(r -> isequaldata(key, record.data, r), record.format)
+    return findfirst(r -> isequaldata(key, record.data, r), record.format_)
 end
 
 function genotype_impl(record::VCFRecord, index::Int, keys::AbstractVector{Int})
@@ -619,7 +619,7 @@ function genotype_impl(record::VCFRecord, index::Int, keys::AbstractVector{Int})
 end
 
 function genotype_impl(record::VCFRecord, index::Int, key::Int)
-    geno = record.genotype[index]
+    geno = record.genotype_[index]
     if key > lastindex(geno)  # dropped field
         return "."
     else
@@ -655,7 +655,7 @@ function Base.show(io::IO, record::VCFRecord)
         if hasformat(record)
             println(io)
             print(io, "     genotype:")
-            for i in 1:lastindex(record.genotype)
+            for i in 1:lastindex(record.genotype_)
                 print(io, " [$(i)] ", let x = genotype(record, i); isempty(x) ? "." : join(x, " "); end)
             end
         end
@@ -674,6 +674,3 @@ function isequaldata(str::String, data::Vector{UInt8}, range::UnitRange{Int})
     return rlen == sizeof(str) && memcmp(pointer(data, first(range)), pointer(str), rlen) == 0
 end
 
-function memcmp(p1::Ptr, p2::Ptr, n::Integer)
-    return ccall(:memcmp, Cint, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), p1, p2, n)
-end
