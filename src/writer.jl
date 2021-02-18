@@ -35,6 +35,6 @@ function Base.write(writer::Writer, header::Header)
     return n
 end
 
-function Base.write(writer::Writer, record::Record)
+function Base.write(writer::Writer, record::VCFRecord)
     return write(writer.stream, record, '\n')
 end

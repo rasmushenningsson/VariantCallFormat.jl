@@ -28,12 +28,12 @@
     @test metainfotag(metainfo) == "INFO"
     @test metainfoval(metainfo) == """<ID=DP,Number=1,Type=Integer,Description="Total Depth">"""
 
-    record = VCF.Record()
+    record = VCFRecord()
     @test !isfilled(record)
-    @test occursin(r"^VariantCallFormat.Record: <not filled>", repr(record))
+    @test occursin(r"^VariantCallFormat.VCFRecord: <not filled>", repr(record))
     @test_throws ArgumentError VCF.chrom(record)
 
-    record = VCF.Record("20\t302\t.\tT\tTA\t999\t.\t.\tGT")
+    record = VCFRecord("20\t302\t.\tT\tTA\t999\t.\t.\tGT")
     @test isfilled(record)
     @test VCF.haschrom(record)
     @test VCF.chrom(record) == "20"
@@ -57,10 +57,10 @@
     @test VCF.format(record) == ["GT"]
 
     # empty data is not a valid VCF record
-    @test_throws ArgumentError VCF.Record("")
-    @test_throws ArgumentError VCF.Record(Vector{UInt8}(""))
+    @test_throws ArgumentError VCFRecord("")
+    @test_throws ArgumentError VCFRecord(Vector{UInt8}(""))
 
-    record = VCF.Record(Vector{UInt8}(".\t.\t.\t.\t.\t.\t.\t.\t"))
+    record = VCFRecord(Vector{UInt8}(".\t.\t.\t.\t.\t.\t.\t.\t"))
     @test isfilled(record)
     @test !VCF.haschrom(record)
     @test !VCF.haspos(record)
@@ -71,23 +71,23 @@
     @test !VCF.hasfilter(record)
     @test !VCF.hasinfo(record)
 
-    record = VCF.Record(record)
-    @test isa(record, VCF.Record)
-    record = VCF.Record(record, chrom="chr1")
+    record = VCFRecord(record)
+    @test isa(record, VCFRecord)
+    record = VCFRecord(record, chrom="chr1")
     @test VCF.chrom(record) == "chr1"
-    record = VCF.Record(record, pos=1234)
+    record = VCFRecord(record, pos=1234)
     @test VCF.pos(record) == 1234
-    record = VCF.Record(record, id="rs1111")
+    record = VCFRecord(record, id="rs1111")
     @test VCF.id(record) == ["rs1111"]
-    record = VCF.Record(record, ref="A")
+    record = VCFRecord(record, ref="A")
     @test VCF.ref(record) == "A"
-    record = VCF.Record(record, alt=["AT"])
+    record = VCFRecord(record, alt=["AT"])
     @test VCF.alt(record) == ["AT"]
-    record = VCF.Record(record, qual=11.2)
+    record = VCFRecord(record, qual=11.2)
     @test VCF.qual(record) == 11.2
-    record = VCF.Record(record, filter="PASS")
+    record = VCFRecord(record, filter="PASS")
     @test VCF.filter(record) == ["PASS"]
-    record = VCF.Record(record, info=Dict("DP" => 20, "AA" => "AT", "DB"=>nothing))
+    record = VCFRecord(record, info=Dict("DP" => 20, "AA" => "AT", "DB"=>nothing))
     @test VCF.hasinfo(record, "DP")
     @test VCF.info(record, "DP") == "20"
     @test VCF.hasinfo(record, "AA")
@@ -96,7 +96,7 @@
     @test VCF.info(record, "DB") == ""
     @test VCF.infokeys(record) == ["DP", "AA", "DB"]
     @test !VCF.hasinfo(record, "XY")
-    record = VCF.Record(record, genotype=[Dict("GT" => "0/0", "DP" => [10,20])])
+    record = VCFRecord(record, genotype=[Dict("GT" => "0/0", "DP" => [10,20])])
     @test VCF.format(record) == ["DP", "GT"]
     @test VCF.genotype(record) == [["10,20", "0/0"]]
 
@@ -205,7 +205,7 @@
     chr2\t4\t.\tA\tAA,AAT\t.\t.\tDP=5\tGT:DP\t0|1:42\t0/1
     """)
     reader = VCF.Reader(BufferedInputStream(data))
-    record = VCF.Record()
+    record = VCFRecord()
 
     @test read!(reader, record) === record
     @test VCF.chrom(record) == "chr1"
@@ -226,7 +226,7 @@
     @test VCF.genotype(record, 2, "GT") == "0/1"
     @test VCF.genotype(record, 1:2, "GT") == ["0|0", "0/1"]
     @test VCF.genotype(record, :, "GT") == VCF.genotype(record, 1:2, "GT")
-    @test occursin(r"^VariantCallFormat.Record:\n.*", repr(record))
+    @test occursin(r"^VariantCallFormat.VCFRecord:\n.*", repr(record))
 
     @test read!(reader, record) === record
     @test VCF.chrom(record) == "chr2"
@@ -258,7 +258,7 @@
     vcfdir = joinpath(fmtdir, "VCF")
     for specimen in YAML.load_file(joinpath(vcfdir, "index.yml"))
         filepath = joinpath(vcfdir, specimen["filename"])
-        records = VCF.Record[]
+        records = VCFRecord[]
         reader = open(VCF.Reader, filepath)
         output = IOBuffer()
         writer = VCF.Writer(output, header(reader))
@@ -269,7 +269,7 @@
         close(reader)
         flush(writer)
 
-        records2 = VCF.Record[]
+        records2 = VCFRecord[]
         for record in VCF.Reader(IOBuffer(take!(output)))
             push!(records2, record)
         end

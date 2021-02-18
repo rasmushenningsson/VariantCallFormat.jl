@@ -21,7 +21,7 @@ function Reader(input::IO)
 end
 
 function Base.eltype(::Type{Reader})
-    return Record
+    return VCFRecord
 end
 
 function BioCore.IO.stream(reader::Reader)
@@ -264,7 +264,7 @@ const vcf_record_actions = Dict(
     :mark                => :(mark = p))
 eval(
     BioCore.ReaderHelper.generate_index_function(
-        Record,
+        VCFRecord,
         vcf_record_machine,
         :(mark = offset = 0),
         vcf_record_actions))

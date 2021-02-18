@@ -10,6 +10,7 @@ import BufferedStreams
 export
     VCF,
     BCF,
+    VCFRecord,
     header,
     metainfo,
     sampleids,
@@ -52,7 +53,7 @@ module VCF
 	const pos = VariantCallFormat.pos
 	const qual = VariantCallFormat.qual
 	const Reader = VariantCallFormat.Reader
-	const Record = VariantCallFormat.Record
+	const Record = VariantCallFormat.VCFRecord
 	const ref = VariantCallFormat.ref
 	const Writer = VariantCallFormat.Writer
 end
