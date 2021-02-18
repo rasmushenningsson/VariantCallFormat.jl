@@ -1,8 +1,8 @@
-mutable struct Reader <: BioCore.IO.AbstractReader
+mutable struct VCFReader <: BioCore.IO.AbstractReader
     state::BioCore.Ragel.State
     header::Header
 
-    function Reader(input::BufferedStreams.BufferedInputStream)
+    function VCFReader(input::BufferedStreams.BufferedInputStream)
         reader = new(BioCore.Ragel.State(vcf_header_machine.start_state, input), Header())
         readheader!(reader)
         reader.state.cs = vcf_body_machine.start_state
@@ -11,28 +11,28 @@ mutable struct Reader <: BioCore.IO.AbstractReader
 end
 
 """
-    VCF.Reader(input::IO)
+    VCFReader(input::IO)
 Create a data reader of the VCF file format.
 # Arguments
 * `input`: data source
 """
-function Reader(input::IO)
-    return Reader(BufferedStreams.BufferedInputStream(input))
+function VCFReader(input::IO)
+    return VCFReader(BufferedStreams.BufferedInputStream(input))
 end
 
-function Base.eltype(::Type{Reader})
+function Base.eltype(::Type{VCFReader})
     return VCFRecord
 end
 
-function BioCore.IO.stream(reader::Reader)
+function BioCore.IO.stream(reader::VCFReader)
     return reader.state.stream
 end
 
 """
-    header(reader::VCF.Reader)::VCF.Header
+    header(reader::VCFReader)::VCF.Header
 Get the header of `reader`.
 """
-function header(reader::Reader)
+function header(reader::VCFReader)
     return reader.header
 end
 
@@ -226,7 +226,7 @@ eval(
         vcf_metainfo_actions))
 eval(
     BioCore.ReaderHelper.generate_readheader_function(
-        Reader,
+        VCFReader,
         MetaInfo,
         vcf_header_machine,
         :(mark1 = mark2 = offset = 0),
@@ -270,7 +270,7 @@ eval(
         vcf_record_actions))
 eval(
     BioCore.ReaderHelper.generate_read_function(
-        Reader,
+        VCFReader,
         vcf_body_machine,
         :(mark = offset = 0),
         merge(vcf_record_actions, Dict(

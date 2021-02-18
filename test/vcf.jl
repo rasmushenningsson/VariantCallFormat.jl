@@ -125,7 +125,7 @@
     ##fileformat=VCFv4.3
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     """)
-    reader = VCF.Reader(BufferedInputStream(data))
+    reader = VCFReader(BufferedInputStream(data))
     @test isa(header(reader), VCF.Header)
     let header = header(reader)
         @test length(header.metainfo) == 1
@@ -148,7 +148,7 @@
     ##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
     """)
-    reader = VCF.Reader(BufferedInputStream(data))
+    reader = VCFReader(BufferedInputStream(data))
     @test isa(header(reader), VCF.Header)
 
     let header = header(reader)
@@ -204,7 +204,7 @@
     chr1\t1234\trs001234\tA\tC\t30\tPASS\tDP=10;AF=0.3\tGT\t0|0\t0/1
     chr2\t4\t.\tA\tAA,AAT\t.\t.\tDP=5\tGT:DP\t0|1:42\t0/1
     """)
-    reader = VCF.Reader(BufferedInputStream(data))
+    reader = VCFReader(BufferedInputStream(data))
     record = VCFRecord()
 
     @test read!(reader, record) === record
@@ -259,9 +259,9 @@
     for specimen in YAML.load_file(joinpath(vcfdir, "index.yml"))
         filepath = joinpath(vcfdir, specimen["filename"])
         records = VCFRecord[]
-        reader = open(VCF.Reader, filepath)
+        reader = open(VCFReader, filepath)
         output = IOBuffer()
-        writer = VCF.Writer(output, header(reader))
+        writer = VCFWriter(output, header(reader))
         for record in reader
             write(writer, record)
             push!(records, record)
@@ -270,7 +270,7 @@
         flush(writer)
 
         records2 = VCFRecord[]
-        for record in VCF.Reader(IOBuffer(take!(output)))
+        for record in VCFReader(IOBuffer(take!(output)))
             push!(records2, record)
         end
         @test records == records2

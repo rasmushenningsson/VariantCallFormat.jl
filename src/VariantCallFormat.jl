@@ -11,6 +11,8 @@ export
     VCF,
     BCF,
     VCFRecord,
+    VCFReader,
+    VCFWriter,
     header,
     metainfo,
     sampleids,
@@ -53,10 +55,10 @@ module VCF
 	const MetaInfo = VariantCallFormat.MetaInfo
 	const pos = VariantCallFormat.pos
 	const qual = VariantCallFormat.qual
-	const Reader = VariantCallFormat.Reader
+	const Reader = VariantCallFormat.VCFReader
 	const Record = VariantCallFormat.VCFRecord
 	const ref = VariantCallFormat.ref
-	const Writer = VariantCallFormat.Writer
+	const Writer = VariantCallFormat.VCFWriter
 end
 
 include("bcf/bcf.jl")
