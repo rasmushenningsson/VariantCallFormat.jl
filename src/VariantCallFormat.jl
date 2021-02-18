@@ -10,6 +10,7 @@ import BufferedStreams
 export
     VCF,
     BCF,
+    VCFHeader,
     VCFRecord,
     VCFReader,
     VCFWriter,
@@ -46,7 +47,7 @@ module VCF
 	const haspos = VariantCallFormat.haspos
 	const hasqual = VariantCallFormat.hasqual
 	const hasref = VariantCallFormat.hasref
-	const Header = VariantCallFormat.Header
+	const Header = VariantCallFormat.VCFHeader
 	const id = VariantCallFormat.id
 	const info = VariantCallFormat.info
 	const infokeys = VariantCallFormat.infokeys

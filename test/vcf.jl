@@ -100,7 +100,7 @@
     @test VCF.format(record) == ["DP", "GT"]
     @test VCF.genotype(record) == [["10,20", "0/0"]]
 
-    let header = VCF.Header()
+    let header = VCFHeader()
         @test isempty(header)
         push!(header, "##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta")
         @test !isempty(header)
@@ -110,10 +110,10 @@
         @test collect(header) == [
             VCF.MetaInfo("##fileformat=VCFv4.3"),
             VCF.MetaInfo("##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta")]
-        @test startswith(repr(header), "VariantCallFormat.Header:")
+        @test startswith(repr(header), "VariantCallFormat.VCFHeader:")
     end
 
-    let header = VCF.Header(["##fileformat=VCFv4.3"], ["Sample1"])
+    let header = VCFHeader(["##fileformat=VCFv4.3"], ["Sample1"])
         @test !isempty(header)
         @test length(header) == 1
         @test header.sampleID == ["Sample1"]
@@ -126,7 +126,7 @@
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
     """)
     reader = VCFReader(BufferedInputStream(data))
-    @test isa(header(reader), VCF.Header)
+    @test isa(header(reader), VCFHeader)
     let header = header(reader)
         @test length(header.metainfo) == 1
         @test metainfotag(header.metainfo[1]) == "fileformat"
@@ -149,7 +149,7 @@
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
     """)
     reader = VCFReader(BufferedInputStream(data))
-    @test isa(header(reader), VCF.Header)
+    @test isa(header(reader), VCFHeader)
 
     let header = header(reader)
         @test length(header.metainfo) == 10

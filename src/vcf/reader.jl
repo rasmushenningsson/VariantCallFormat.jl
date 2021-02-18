@@ -1,9 +1,9 @@
 mutable struct VCFReader <: BioCore.IO.AbstractReader
     state::BioCore.Ragel.State
-    header::Header
+    header::VCFHeader
 
     function VCFReader(input::BufferedStreams.BufferedInputStream)
-        reader = new(BioCore.Ragel.State(vcf_header_machine.start_state, input), Header())
+        reader = new(BioCore.Ragel.State(vcf_header_machine.start_state, input), VCFHeader())
         readheader!(reader)
         reader.state.cs = vcf_body_machine.start_state
         return reader
@@ -29,7 +29,7 @@ function BioCore.IO.stream(reader::VCFReader)
 end
 
 """
-    header(reader::VCFReader)::VCF.Header
+    header(reader::VCFReader)::VCFHeader
 Get the header of `reader`.
 """
 function header(reader::VCFReader)

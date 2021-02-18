@@ -3,13 +3,13 @@ mutable struct VCFWriter{T<:IO} <: BioCore.IO.AbstractWriter
 end
 
 """
-    VCFWriter(output::IO, header::VCF.Header)
+    VCFWriter(output::IO, header::VCFHeader)
 Create a data writer of the VCF file format.
 # Arguments
 * `output`: data sink
 * `header`: VCF header object
 """
-function VCFWriter(output::IO, header::Header)
+function VCFWriter(output::IO, header::VCFHeader)
     writer = VCFWriter(output)
     write(writer, header)
     return writer
@@ -19,7 +19,7 @@ function BioCore.IO.stream(writer::VCFWriter)
     return writer.stream
 end
 
-function Base.write(writer::VCFWriter, header::Header)
+function Base.write(writer::VCFWriter, header::VCFHeader)
     n = 0
     for metainfo in header.metainfo
         n += write(writer.stream, metainfo, '\n')
