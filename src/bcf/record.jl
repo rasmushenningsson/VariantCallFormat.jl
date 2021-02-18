@@ -1,4 +1,4 @@
-mutable struct Record
+mutable struct BCFRecord
     # data and filled range
     data::Vector{UInt8}
     filled::UnitRange{Int}
@@ -8,28 +8,28 @@ mutable struct Record
 end
 
 """
-    BCF.Record()
+    BCFRecord()
 Create an unfilled BCF record.
 """
-function Record()
-    return Record(UInt8[], 1:0, 0, 0)
+function BCFRecord()
+    return BCFRecord(UInt8[], 1:0, 0, 0)
 end
 
-function isfilled(record::Record)
+function isfilled(record::BCFRecord)
     return !isempty(record.filled)
 end
 
-function datarange(record::Record)
+function datarange(record::BCFRecord)
     return record.filled
 end
 
-function checkfilled(record::Record)
+function checkfilled(record::BCFRecord)
     if !isfilled(record)
         throw(ArgumentError("unfilled BCF record"))
     end
 end
 
-function Base.:(==)(record1::Record, record2::Record)
+function Base.:(==)(record1::BCFRecord, record2::BCFRecord)
     if isfilled(record1) == isfilled(record2) == true
         r1 = datarange(record1)
         r2 = datarange(record2)
@@ -39,14 +39,14 @@ function Base.:(==)(record1::Record, record2::Record)
     end
 end
 
-function Base.copy(record::Record)
-    return Record(record.data[record.filled], record.filled, record.sharedlen, record.indivlen)
+function Base.copy(record::BCFRecord)
+    return BCFRecord(record.data[record.filled], record.filled, record.sharedlen, record.indivlen)
 end
 
-function Record(base::Record;
-                chrom=nothing, pos=nothing, qual=nothing,
-                id=nothing, ref=nothing, alt=nothing,
-                filter=nothing, info=nothing, genotype=nothing)
+function BCFRecord(base::BCFRecord;
+                   chrom=nothing, pos=nothing, qual=nothing,
+                   id=nothing, ref=nothing, alt=nothing,
+                   filter=nothing, info=nothing, genotype=nothing)
     checkfilled(base)
     data = base.data[1:24]
 
@@ -170,10 +170,10 @@ function Record(base::Record;
         error("modifying genotype is not yet supported")
     end
 
-    return Record(data, 1:lastindex(data), sharedlen, offset - sharedlen)
+    return BCFRecord(data, 1:lastindex(data), sharedlen, offset - sharedlen)
 end
 
-function Base.show(io::IO, record::Record)
+function Base.show(io::IO, record::BCFRecord)
     print(io, summary(record), ':')
     if isfilled(record)
         println(io)
@@ -195,75 +195,75 @@ end
 # ------------------
 
 """
-    chrom(record::Record)::Int
+    chrom(record::BCFRecord)::Int
 Get the chromosome index of `record`.
 """
-function chrom(record::Record)::Int
+function chrom(record::BCFRecord)::Int
     checkfilled(record)
     return load(Int32, record.data, 0)[1] % Int + 1
 end
 
 """
-    pos(record::Record)::Int
+    pos(record::BCFRecord)::Int
 Get the reference position of `record`.
 Note that the position of the first base is 1 (i.e. 1-based coordinate).
 """
-function pos(record::Record)::Int
+function pos(record::BCFRecord)::Int
     checkfilled(record)
     return load(Int32, record.data, 4)[1] % Int + 1
 end
 
 """
-    rlen(record::Record)::Int
+    rlen(record::BCFRecord)::Int
 Get the length of `record` projected onto the reference sequence.
 """
-function rlen(record::Record)::Int
+function rlen(record::BCFRecord)::Int
     checkfilled(record)
     return load(Int32, record.data, 8)[1] % Int
 end
 
 """
-    qual(record::Record)::Float32
+    qual(record::BCFRecord)::Float32
 Get the quality score of `record`.
 Note that `0x7F800001` (signaling NaN) is interpreted as a missing value.
 """
-function qual(record::Record)
+function qual(record::BCFRecord)
     checkfilled(record)
     # 0x7F800001 is a missing value.
     return load(Float32, record.data, 12)[1]
 end
 
-function n_allele(rec::Record)
+function n_allele(rec::BCFRecord)
     checkfilled(rec)
     return (load(Int32, rec.data, 16)[1] >> 16) % Int
 end
 
-function n_info(rec::Record)
+function n_info(rec::BCFRecord)
     checkfilled(rec)
     return (load(Int32, rec.data, 16)[1] & 0x0000FFFF) % Int
 end
 
-function n_format(rec::Record)
+function n_format(rec::BCFRecord)
     checkfilled(rec)
     return (load(UInt32, rec.data, 20)[1] >> 24) % Int
 end
 
-function n_sample(rec::Record)
+function n_sample(rec::BCFRecord)
     checkfilled(rec)
     return (load(UInt32, rec.data, 20)[1] & 0x00FFFFFF) % Int
 end
 
-function id(rec::Record)
+function id(rec::BCFRecord)
     checkfilled(rec)
     offset = 24
     return loadstr(rec.data, offset)[1]
 end
 
 """
-    ref(record::Record)::String
+    ref(record::BCFRecord)::String
 Get the reference bases of `record`.
 """
-function ref(record::Record)::String
+function ref(record::BCFRecord)::String
     checkfilled(record)
     # skip ID
     offset = 24
@@ -273,10 +273,10 @@ function ref(record::Record)::String
 end
 
 """
-    alt(record::Record)::Vector{String}
+    alt(record::BCFRecord)::Vector{String}
 Get the alternate bases of `record`.
 """
-function alt(record::Record)
+function alt(record::BCFRecord)
     checkfilled(record)
     # skip ID and REF
     offset = 24
@@ -294,10 +294,10 @@ function alt(record::Record)
 end
 
 """
-    filter(record::Record)::Vector{Int}
+    filter(record::BCFRecord)::Vector{Int}
 Get the filter indexes of `record`.
 """
-function filter(record::Record)::Vector{Int}
+function filter(record::BCFRecord)::Vector{Int}
     checkfilled(record)
     # skip ID, REF and ALTs
     offset = 24
@@ -310,12 +310,12 @@ function filter(record::Record)::Vector{Int}
 end
 
 """
-    info(record::Record, [simplify::Bool=true])::Vector{Tuple{Int,Any}}
+    info(record::BCFRecord, [simplify::Bool=true])::Vector{Tuple{Int,Any}}
 Get the additional information of `record`.
 When `simplify` is `true`, a vector with a single element is converted to the
 element itself and an empty vector of the void type is converted to `nothing`.
 """
-function info(record::Record; simplify::Bool=true)::Vector{Tuple{Int,Any}}
+function info(record::BCFRecord; simplify::Bool=true)::Vector{Tuple{Int,Any}}
     checkfilled(record)
     # skip ID, REF, ALTs and FILTER
     offset::Int = 24
@@ -343,12 +343,12 @@ function info(record::Record; simplify::Bool=true)::Vector{Tuple{Int,Any}}
 end
 
 """
-    info(record::Record, key::Integer, [simplify::Bool=true])
+    info(record::BCFRecord, key::Integer, [simplify::Bool=true])
 Get the additional information of `record` with `key`.
 When `simplify` is `true`, a vector with a single element is converted to the
 element itself and an empty vector of the Nothing type is converted to `nothing`.
 """
-function info(record::Record, key::Integer; simplify::Bool=true)
+function info(record::BCFRecord, key::Integer; simplify::Bool=true)
     checkfilled(record)
     # skip ID, REF, ALTs and FILTER
     offset::Int = 24
@@ -379,11 +379,11 @@ function info(record::Record, key::Integer; simplify::Bool=true)
 end
 
 """
-    genotype(record::Record)::Vector{Tuple{Int,Vector{Any}}}
+    genotype(record::BCFRecord)::Vector{Tuple{Int,Vector{Any}}}
 Get the genotypes of `record`.
 BCF genotypes are encoded by field, not by sample like VCF.
 """
-function genotype(record::Record)::Vector{Tuple{Int,Vector{Any}}}
+function genotype(record::BCFRecord)::Vector{Tuple{Int,Vector{Any}}}
     checkfilled(record)
     offset::Int = record.sharedlen
     N = n_sample(record)
@@ -402,11 +402,11 @@ function genotype(record::Record)::Vector{Tuple{Int,Vector{Any}}}
     return ret
 end
 
-function genotype(record::Record, index::Integer)
+function genotype(record::BCFRecord, index::Integer)
     return [(k, geno[index]) for (k, geno) in genotype(record)]
 end
 
-function genotype(record::Record, index::Integer, key::Integer)
+function genotype(record::BCFRecord, index::Integer, key::Integer)
     checkfilled(record)
     N = n_sample(record)
     offset::Int = record.sharedlen
@@ -425,7 +425,7 @@ function genotype(record::Record, index::Integer, key::Integer)
     throw(KeyError(key))
 end
 
-function genotype(record::Record, indexes::AbstractVector{<:Integer}, key::Integer)
+function genotype(record::BCFRecord, indexes::AbstractVector{<:Integer}, key::Integer)
     checkfilled(record)
     N = n_sample(record)
     offset::Int = record.sharedlen
@@ -449,7 +449,7 @@ function genotype(record::Record, indexes::AbstractVector{<:Integer}, key::Integ
     throw(KeyError(key))
 end
 
-function genotype(record::Record, ::Colon, key::Integer)
+function genotype(record::BCFRecord, ::Colon, key::Integer)
     return genotype(record, 1:n_sample(record), key)
 end
 

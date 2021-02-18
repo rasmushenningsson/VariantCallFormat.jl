@@ -1,16 +1,16 @@
-struct Reader{T<:IO} <: BioCore.IO.AbstractReader
+struct BCFReader{T<:IO} <: BioCore.IO.AbstractReader
     version::Tuple{UInt8,UInt8}  # (major, minor)
-    header::VCF.Header
+    header::VCFHeader
     stream::BGZFStreams.BGZFStream{T}
 end
 
 """
-    BCF.Reader(input::IO)
+    BCFReader(input::IO)
 Create a data reader of the BCF file format.
 # Arguments
 * `input`: data source
 """
-function Reader(input::IO)
+function BCFReader(input::IO)
     stream = BGZFStreams.BGZFStream(input)
 
     # magic bytes and BCF version
@@ -31,28 +31,28 @@ function Reader(input::IO)
     data = read(stream, l_header)
 
     # parse VCF header
-    vcfreader = VCF.Reader(BufferedStreams.BufferedInputStream(data))
+    vcfreader = VCFReader(BufferedStreams.BufferedInputStream(data))
 
-    return Reader((major, minor), vcfreader.header, stream)
+    return BCFReader((major, minor), vcfreader.header, stream)
 end
 
-function Base.eltype(::Type{Reader{T}}) where T
-    return Record
+function Base.eltype(::Type{BCFReader{T}}) where T
+    return BCFRecord
 end
 
-function BioCore.IO.stream(reader::Reader)
+function BioCore.IO.stream(reader::BCFReader)
     return reader.stream
 end
 
 """
-    header(reader::BCF.Reader)::VCF.Header
+    header(reader::BCFReader)::VCFHeader
 Get the header of `reader`.
 """
-function header(reader::Reader)
+function header(reader::BCFReader)
     return reader.header
 end
 
-function Base.read!(reader::Reader, record::Record)
+function Base.read!(reader::BCFReader, record::BCFRecord)
     sharedlen = read(reader.stream, UInt32)
     indivlen = read(reader.stream, UInt32)
     datalen = sharedlen + indivlen

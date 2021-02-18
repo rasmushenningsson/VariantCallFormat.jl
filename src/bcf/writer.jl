@@ -1,15 +1,15 @@
-struct Writer{T<:IO} <: BioCore.IO.AbstractWriter
+struct BCFWriter{T<:IO} <: BioCore.IO.AbstractWriter
     stream::BGZFStreams.BGZFStream{T}
 end
 
 """
-    BCF.Writer(output::IO, header::VCF.Header)
+    BCFWriter(output::IO, header::VCFHeader)
 Create a data writer of the BCF file format.
 # Arguments
 * `output`: data sink
 * `header`: VCF header object
 """
-function Writer(output::IO, header::VCF.Header)
+function BCFWriter(output::IO, header::VCFHeader)
     stream = BGZFStreams.BGZFStream(output, "w")
     write(stream, b"BCF\x02\x02")
     buf = IOBuffer()
@@ -21,14 +21,14 @@ function Writer(output::IO, header::VCF.Header)
     data = take!(buf)
     @assert length(data) == len
     write(stream, data)
-    return Writer(stream)
+    return BCFWriter(stream)
 end
 
-function BioCore.IO.stream(writer::Writer)
+function BioCore.IO.stream(writer::BCFWriter)
     return writer.stream
 end
 
-function Base.write(writer::Writer, record::Record)
+function Base.write(writer::BCFWriter, record::BCFRecord)
     n = 0
     n += write(writer.stream, htol(record.sharedlen))
     n += write(writer.stream, htol(record.indivlen))
