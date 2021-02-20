@@ -10,7 +10,7 @@ const recordpropertynames = (:chrom,
                              :info,
                              :format,
                              :genotype,
-                             # :info, # TODO: Add
+                             :info,
                              # :genotype, # TODO: Add
                             )
 
@@ -28,8 +28,8 @@ function Base.getproperty(record::AbstractRecord, sym::Symbol)
 	sym==:alt && return alt(record)
 	sym==:qual && return qual(record)
 	sym==:filter && return filter(record)
-	sym==:info && return info(record)
+	sym==:info && return infodict(record)
 	sym==:format && return format(record)
-	sym==:genotype && return genotype(record)
+	# sym==:genotype && return GenotypeWrapper(record)
 	getfield(record,sym)
 end

@@ -451,14 +451,9 @@ Get the additional information of `record`.
 function info(record::VCFRecord)::Vector{Pair{String,String}}
     checkfilled(record)
     if isempty(record.infokey_)
-        missingerror(:info)
+        missingerror(:info) # TODO: deprecate this behavior, it's OK with an empty dict.
     end
-    ret = Pair{String,String}[]
-    for (i, key) in enumerate(record.infokey_)
-        val = infovalrange(record, i)
-        push!(ret, String(record.data[key]) => String(record.data[val]))
-    end
-    return ret
+    return collect(record.info)
 end
 
 function hasinfo(record::VCFRecord)
@@ -471,30 +466,11 @@ Get the additional information of `record` with `key`.
 Keys without corresponding values return an empty string.
 """
 function info(record::VCFRecord, key::String)::String
-    checkfilled(record)
-    i = findinfokey(record, key)
-    if i == 0
-        throw(KeyError(key))
-    end
-    val = infovalrange(record, i)
-    if isempty(val)
-        return ""
-    else
-        return String(record.data[val])
-    end
+    return record.info[key]
 end
 
 function hasinfo(record::VCFRecord, key::String)
-    return isfilled(record) && findinfokey(record, key) > 0
-end
-
-function findinfokey(record::VCFRecord, key::String)
-    for i in 1:lastindex(record.infokey_)
-        if isequaldata(key, record.data, record.infokey_[i])
-            return i
-        end
-    end
-    return 0
+    return haskey(record.info, key)
 end
 
 """
@@ -509,19 +485,7 @@ end
 
 # Returns the data range of the `i`-th value.
 function infovalrange(record::VCFRecord, i::Int)
-    checkfilled(record)
-    data = record.data
-    key = record.infokey_[i]
-    if last(key) + 1 ≤ lastindex(data) && data[last(key)+1] == UInt8('=')
-        endpos = something(findnext(isequal(0x3B), data, last(key)+1), 0) # 0x3B is byte equivalent of char ';'.
-        if endpos == 0
-            endpos = something(findnext(isequal(0x09), data, last(key)+1), 0) # 0x09 is byte equivalent of char '\t'
-            @assert endpos != 0
-        end
-        return last(key)+2:endpos-1
-    else
-        return last(key)+1:last(key)
-    end
+    return infovalrange(infodict(record),i)
 end
 
 """
@@ -640,7 +604,7 @@ function Base.show(io::IO, record::VCFRecord)
         println(io, "       filter: ", hasfilter(record) ? join(filter(record), " ") : "<missing>")
           print(io, "  information: ")
         if hasinfo(record)
-            for (key, val) in info(record)
+            for (key, val) in record.info
                 print(io, key)
                 if !isempty(val)
                     print(io, '=', val)
@@ -667,10 +631,3 @@ end
 function ismissing(record::VCFRecord, range::UnitRange{Int})
     return length(range) == 1 && record.data[first(range)] == UInt8('.')
 end
-
-# Check if `str == data[range]`
-function isequaldata(str::String, data::Vector{UInt8}, range::UnitRange{Int})
-    rlen = length(range)
-    return rlen == sizeof(str) && memcmp(pointer(data, first(range)), pointer(str), rlen) == 0
-end
-
