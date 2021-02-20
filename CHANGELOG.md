@@ -5,8 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.5.0] - 2020-02-18
+Created VariantCallFormat.jl package, based on [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
+
 ### Added
-- Created VariantCallFormat.jl package, based on [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
 - Added Project.toml.
 
 ## Changed
@@ -59,10 +62,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release, split from [Bio.jl](https://github.com/BioJulia/Bio.jl).
 
-[Unreleased]: https://github.com/rasmushenningsson/VariantCallFormat.jl/compare/v0.4.0...HEAD
--[0.4.0]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.3.1...v0.4.0
--[0.3.2]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.3.1...v0.3.2
--[0.3.1]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.3.0...v0.3.1
--[0.3.0]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.2.0...v0.3.0
--[0.2.0]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.1.0...v0.2.0
--[0.1.0]: https://github.com/BioJulia/GeneticVariation.jl/tree/v0.1.0
+[Unreleased]: https://github.com/rasmushenningsson/VariantCallFormat.jl/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/rasmushenningsson/VariantCallFormat.jl/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.3.1...v0.4.0
+[0.3.2]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/BioJulia/GeneticVariation.jl/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/BioJulia/GeneticVariation.jl/tree/v0.1.0
