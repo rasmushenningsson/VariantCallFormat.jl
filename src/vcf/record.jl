@@ -479,8 +479,7 @@ Get the keys of the additional information of `record`.
 This function returns an empty vector when the INFO field is missing.
 """
 function infokeys(record::VCFRecord)::Vector{String}
-    checkfilled(record)
-    return [String(record.data[key]) for key in record.infokey_]
+    collect(keys(record.info))
 end
 
 # Returns the data range of the `i`-th value.
@@ -509,12 +508,7 @@ end
 Get the genotypes of `record`.
 """
 function genotype(record::VCFRecord)
-    checkfilled(record)
-    ret = Vector{String}[]
-    for i in 1:lastindex(record.genotype_)
-        push!(ret, genotype_impl(record, i, 1:lastindex(record.format_)))
-    end
-    return ret
+    Vector{String}[ record.genotype[i,:] for i in 1:lastindex(record.genotype_)]
 end
 
 """
@@ -523,8 +517,7 @@ Get the genotypes of the `index`-th individual in `record`.
 This is effectively equivalent to `genotype(record)[index]` but more efficient.
 """
 function genotype(record::VCFRecord, index::Integer)
-    checkfilled(record)
-    return genotype_impl(record, index, 1:lastindex(record.format_))
+    return record.genotype[index,:]
 end
 
 """
@@ -534,61 +527,23 @@ Get the genotypes in `record` that match `indexes` and `keys`.
 Trailing fields that are dropped are filled with `"."`.
 """
 function genotype(record::VCFRecord, index::Integer, key::String)::String
-    checkfilled(record)
-    k = findgenokey(record, key)
-    if k == nothing
-        throw(KeyError(key))
-    end
-    return genotype_impl(record, index, k)
+    return record.genotype[index,key]
 end
 
 function genotype(record::VCFRecord, index::Integer, keys::AbstractVector{String})::Vector{String}
-    checkfilled(record)
-    return [genotype(record, index, key) for key in keys]
+    return record.genotype[index,keys]
 end
 
 function genotype(record::VCFRecord, indexes::AbstractVector{T}, key::String)::Vector{String} where T<:Integer
-    checkfilled(record)
-    k = findgenokey(record, key)
-    if k == nothing
-        throw(KeyError(key))
-    end
-    return [genotype_impl(record, i, k) for i in indexes]
+    return record.genotype[indexes,key]
 end
 
 function genotype(record::VCFRecord, indexes::AbstractVector{T}, keys::AbstractVector{String})::Vector{Vector{String}} where T<:Integer
-    checkfilled(record)
-    ks = Vector{Int}(length(keys))
-    for i in 1:lastindex(keys)
-        key = keys[i]
-        k = findgenokey(record, key)
-        if k == nothing
-            throw(KeyError(key))
-        end
-        ks[i] = k
-    end
-    return [genotype_impl(record, i, ks) for i in indexes]
+    return record.genotype[indexes,keys]
 end
 
 function genotype(record::VCFRecord, ::Colon, key::String)::Vector{String}
-    return genotype(record, 1:lastindex(record.genotype_), key)
-end
-
-function findgenokey(record::VCFRecord, key::String)
-    return findfirst(r -> isequaldata(key, record.data, r), record.format_)
-end
-
-function genotype_impl(record::VCFRecord, index::Int, keys::AbstractVector{Int})
-    return [genotype_impl(record, index, k) for k in keys]
-end
-
-function genotype_impl(record::VCFRecord, index::Int, key::Int)
-    geno = record.genotype_[index]
-    if key > lastindex(geno)  # dropped field
-        return "."
-    else
-        return String(record.data[geno[key]])
-    end
+    return record.genotype[:,key]
 end
 
 function Base.show(io::IO, record::VCFRecord)
