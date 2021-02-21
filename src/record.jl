@@ -594,7 +594,7 @@ end
 
 function genotype(record::Record, indexes::AbstractVector{T}, keys::AbstractVector{String})::Vector{Vector{String}} where T<:Integer
     checkfilled(record)
-    ks = Vector{Int}(length(keys))
+    ks = Vector{Int}(undef, length(keys))
     for i in 1:lastindex(keys)
         key = keys[i]
         k = findgenokey(record, key)
