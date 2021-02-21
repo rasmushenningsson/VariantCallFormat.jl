@@ -12,11 +12,11 @@ infodict(record::VCFRecord) = VCFInfoDict(record)
 
 
 # AbstractDict interface
-Base.haskey(vinfo::VCFInfoDict, key::String) = findinfokey(vinfo, key) > 0
+Base.haskey(vinfo::VCFInfoDict, key::String) = findinfokey(vinfo, key) !== nothing
 
 function Base.get(f, vinfo::VCFInfoDict, key::String)
     i = findinfokey(vinfo, key)
-    i == 0 && return f()
+    i === nothing && return f()
     val = infovalrange(vinfo, i)
     return isempty(val) ? "" : String(vinfo.data[val])
 end
@@ -38,7 +38,7 @@ end
 
 
 function findinfokey(vinfo::VCFInfoDict, key::String)
-	something(findfirst(x->isequaldata(key,vinfo.data,x), vinfo.infokey), 0)
+	findfirst(x->isequaldata(key,vinfo.data,x), vinfo.infokey)
 end
 
 
