@@ -539,7 +539,10 @@ function genotype(record::VCFRecord, indexes::AbstractVector{T}, key::String)::V
 end
 
 function genotype(record::VCFRecord, indexes::AbstractVector{T}, keys::AbstractVector{String})::Vector{Vector{String}} where T<:Integer
-    return record.genotype[indexes,keys]
+    # keep old (deprecated) behavior returning Vector{Vector{String}}
+    g = record.genotype
+    ks = findgenokey.(Ref(g),keys)
+    [ g[i, ks] for i in indexes ]
 end
 
 function genotype(record::VCFRecord, ::Colon, key::String)::Vector{String}
