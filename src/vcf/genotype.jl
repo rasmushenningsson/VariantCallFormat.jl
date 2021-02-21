@@ -1,4 +1,4 @@
-struct VCFGenotypeWrapper <: AbstractArray{String,2}
+struct VCFGenotypeWrapper <: AbstractMatrix{String}
     data::Vector{UInt8}
     format::Vector{UnitRange{Int}}
     genotype::Vector{Vector{UnitRange{Int}}}
@@ -12,8 +12,7 @@ end
 genotypewrapper(record::VCFRecord) = VCFGenotypeWrapper(record)
 
 
-# AbstractArray interface (IndexStyle is IndexCartesian)
-Base.IteratorSize(::VCFGenotypeWrapper) = HasShape{2}()
+# AbstractMatrix interface (IndexStyle is IndexCartesian)
 Base.size(g::VCFGenotypeWrapper) = (length(g.genotype),length(g.format))
 Base.getindex(g::VCFGenotypeWrapper, i::Int, key::Int) = genotype_impl(g, i, key)
 
@@ -69,7 +68,7 @@ Base.getindex(g::VCFGenotypeWrapper, I, key::AbstractVector{String}) = g[I,findg
 #     return g[1:lastindex(g.genotype), key]
 # end
 
-# End AbstractArray interface
+# End AbstractMatrix interface
 
 
 
@@ -80,9 +79,9 @@ function findgenokey(g::VCFGenotypeWrapper, key::String)
     j
 end
 
-function genotype_impl(g::VCFGenotypeWrapper, index::Int, keys::AbstractVector{Int})
-    return [genotype_impl(g, index, k) for k in keys]
-end
+# function genotype_impl(g::VCFGenotypeWrapper, index::Int, keys::AbstractVector{Int})
+#     return [genotype_impl(g, index, k) for k in keys]
+# end
 
 function genotype_impl(g::VCFGenotypeWrapper, index::Int, key::Int)
     geno = g.genotype[index]
