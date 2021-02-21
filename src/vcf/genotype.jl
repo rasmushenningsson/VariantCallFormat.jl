@@ -53,7 +53,7 @@ Base.getindex(g::VCFGenotypeWrapper, I, key::AbstractVector{String}) = g[I,findg
 # end
 
 # function Base.getindex(g::VCFGenotypeWrapper, indexes::AbstractVector{T}, keys::AbstractVector{String})::Vector{Vector{String}} where T<:Integer
-#     ks = Vector{Int}(length(keys))
+#     ks = Vector{Int}(undef, length(keys))
 #     for i in 1:lastindex(keys)
 #         key = keys[i]
 #         k = findgenokey(g, key)

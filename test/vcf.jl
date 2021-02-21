@@ -250,7 +250,12 @@
     @test VCF.genotype(record, 1:2, "GT") == ["0|1", "0/1"]
     @test VCF.genotype(record, 1:2, "DP") == ["42", "."]
     @test VCF.genotype(record, :, "DP") == VCF.genotype(record, 1:2, "DP")
+    @test VCF.genotype(record, 1, ["GT","DP"]) == ["0|1", "42"]
+    @test VCF.genotype(record, 2, ["GT","DP"]) == ["0/1", "."]
+    @test VCF.genotype(record, 1:2, ["GT","DP"]) == [["0|1", "42"], ["0/1", "."]]
+    @test VCF.genotype(record, [1,2], ["GT","DP"]) == [["0|1", "42"], ["0/1", "."]]
     @test_throws KeyError VCF.genotype(record, :, "BAD")
+    @test_throws KeyError VCF.genotype(record, 1:2, ["GT","BAD"])
 
     @test_throws EOFError read!(reader, record)
 
