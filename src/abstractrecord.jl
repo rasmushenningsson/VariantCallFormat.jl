@@ -37,7 +37,7 @@ _getproperty(record::AbstractRecord, ::Val{:qual}) = qual(record)
 _getproperty(record::AbstractRecord, ::Val{:filter}) = filter(record)
 _getproperty(record::AbstractRecord, ::Val{:info}) = infodict(record)
 _getproperty(record::AbstractRecord, ::Val{:format}) = format(record)
-_getproperty(record::AbstractRecord, ::Val{:genotype}) = genotypewrapper(record)
+_getproperty(record::AbstractRecord, ::Val{:genotype}) = genotypematrix(record)
 _getproperty(record::AbstractRecord, ::Val{sym}) where {sym} = getfield(record,sym)
 
 
@@ -53,6 +53,6 @@ _getproperty(record::AbstractRecord, ::Val{sym}) where {sym} = getfield(record,s
 # 	sym==:filter && return filter(record)
 # 	sym==:info && return infodict(record)
 # 	sym==:format && return format(record)
-# 	sym==:genotype && return genotypewrapper(record)
+# 	sym==:genotype && return genotypematrix(record)
 # 	getfield(record,sym)
 # end
