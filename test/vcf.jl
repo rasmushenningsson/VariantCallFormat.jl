@@ -43,6 +43,7 @@
     @test_throws MissingFieldException VCF.id(record)
     @test VCF.hasref(record)
     @test VCF.ref(record) == "T"
+    @test VCF.rlen(record) == 1
     @test VCF.hasalt(record)
     @test VCF.alt(record) == ["TA"]
     @test VCF.hasqual(record)
@@ -81,6 +82,7 @@
     @test VCF.id(record) == ["rs1111"]
     record = VCFRecord(record, ref="A")
     @test VCF.ref(record) == "A"
+    @test VCF.rlen(record) == 1
     record = VCFRecord(record, alt=["AT"])
     @test VCF.alt(record) == ["AT"]
     record = VCFRecord(record, qual=11.2)

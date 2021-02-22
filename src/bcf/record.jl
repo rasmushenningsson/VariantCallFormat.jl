@@ -233,26 +233,46 @@ function qual(record::BCFRecord)
     return load(Float32, record.data, 12)[1]
 end
 
+"""
+    n_allele(record::BCFRecord)::Int
+Get the number of alleles for `record`, counting ref and each alt.
+"""
 function n_allele(rec::BCFRecord)
     checkfilled(rec)
     return (load(Int32, rec.data, 16)[1] >> 16) % Int
 end
 
+"""
+    n_info(record::BCFRecord)::Int
+Get the number of info entries for `record`.
+"""
 function n_info(rec::BCFRecord)
     checkfilled(rec)
     return (load(Int32, rec.data, 16)[1] & 0x0000FFFF) % Int
 end
 
+"""
+    n_format(record::BCFRecord)::Int
+Get the number of format entries for `record`.
+"""
 function n_format(rec::BCFRecord)
     checkfilled(rec)
     return (load(UInt32, rec.data, 20)[1] >> 24) % Int
 end
 
+"""
+    n_sample(record::BCFRecord)::Int
+Get the number of samples for `record`.
+"""
 function n_sample(rec::BCFRecord)
     checkfilled(rec)
     return (load(UInt32, rec.data, 20)[1] & 0x00FFFFFF) % Int
 end
 
+"""
+    id(record::BCFRecord)::Vector{String}
+Get the identifiers of `record`.
+"""
 function id(rec::BCFRecord)
     checkfilled(rec)
     offset = 24

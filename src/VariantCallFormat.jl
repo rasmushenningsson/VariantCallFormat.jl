@@ -72,6 +72,11 @@ module VCF
 	const Reader = VariantCallFormat.VCFReader
 	const Record = VariantCallFormat.VCFRecord
 	const ref = VariantCallFormat.ref
+	const rlen = VariantCallFormat.rlen
+	const n_allele = VariantCallFormat.n_allele
+	const n_info = VariantCallFormat.n_info
+	const n_format = VariantCallFormat.n_format
+	const n_sample = VariantCallFormat.n_sample
 	const Writer = VariantCallFormat.VCFWriter
 end
 

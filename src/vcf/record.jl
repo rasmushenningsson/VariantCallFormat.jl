@@ -549,6 +549,55 @@ function genotype(record::VCFRecord, ::Colon, key::String)::Vector{String}
     return record.genotype[:,key]
 end
 
+"""
+    rlen(record::VCFRecord)::Int
+Get the length of `record` projected onto the reference sequence.
+"""
+function rlen(record::VCFRecord)::Int
+    checkfilled(record)
+    return length(record.ref_)
+end
+
+"""
+    n_allele(record::VCFRecord)::Int
+Get the number of alleles for `record`, counting ref and each alt.
+"""
+function n_allele(record::VCFRecord)
+    checkfilled(rec)
+    return length(record.alt_)
+end
+
+"""
+    n_info(record::VCFRecord)::Int
+Get the number of info entries for `record`.
+"""
+function n_info(record::VCFRecord)
+    checkfilled(rec)
+    return length(record.infokey_)
+end
+
+"""
+    n_format(record::VCFRecord)::Int
+Get the number of format entries for `record`.
+"""
+function n_format(record::VCFRecord)
+    checkfilled(rec)
+    return length(record.format_)
+end
+
+"""
+    n_sample(record::VCFRecord)::Int
+Get the number of samples for `record`.
+"""
+function n_sample(record::VCFRecord)
+    checkfilled(rec)
+    return length(record.genotype_)
+end
+
+
+
+
+
 function Base.show(io::IO, record::VCFRecord)
     print(io, summary(record), ':')
     if isfilled(record)
