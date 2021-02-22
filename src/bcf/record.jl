@@ -73,6 +73,8 @@ function BCFRecord(base::BCFRecord;
     else
         ref = string(ref)
         offset = storestr!(data, offset, ref)
+
+        # TODO: This is an incorrect handling of rlen for symbolic alleles. But it's OK if ref is just a string of bases.
         if sizeof(ref) != rlen(base)
             store!(data, 8, convert(Int32, sizeof(ref)))
         end
@@ -203,6 +205,10 @@ function chrom(record::BCFRecord)::Int
     return load(Int32, record.data, 0)[1] % Int + 1
 end
 
+function haschrom(record::BCFRecord)
+    return isfilled(record) && load(UInt32, record.data, 0)[1] != 0x80000000
+end
+
 """
     pos(record::BCFRecord)::Int
 Get the reference position of `record`.
@@ -212,6 +218,11 @@ function pos(record::BCFRecord)::Int
     checkfilled(record)
     return load(Int32, record.data, 4)[1] % Int + 1
 end
+
+function haspos(record::BCFRecord)
+    return isfilled(record) && load(UInt32, record.data, 4)[1] != 0x80000000
+end
+
 
 """
     rlen(record::BCFRecord)::Int
@@ -232,6 +243,11 @@ function qual(record::BCFRecord)
     # 0x7F800001 is a missing value.
     return load(Float32, record.data, 12)[1]
 end
+
+function hasqual(record::BCFRecord)
+    return isfilled(record) && load(UInt32, record.data, 12)[1] != 0x7F800001
+end
+
 
 """
     n_allele(record::BCFRecord)::Int
@@ -279,6 +295,11 @@ function id(rec::BCFRecord)
     return loadstr(rec.data, offset)[1]
 end
 
+function hasid(record::BCFRecord)
+    return isfilled(record) && load(UInt8, rec.data, 24)[1] != 0x07
+end
+
+
 """
     ref(record::BCFRecord)::String
 Get the reference bases of `record`.
@@ -291,6 +312,16 @@ function ref(record::BCFRecord)::String
     # load REF
     return loadstr(record.data, offset + len)[1]
 end
+
+function hasref(record::BCFRecord)
+    isfilled(record) || return false
+    # skip ID
+    offset = 24
+    len, offset = loadveclen(record.data, offset)
+    return load(UInt8, rec.data, offset + len)[1] != 0x07
+end
+
+
 
 """
     alt(record::BCFRecord)::Vector{String}
@@ -313,6 +344,19 @@ function alt(record::BCFRecord)
     return alt
 end
 
+function hasalt(record::BCFRecord)
+    isfilled(record) || return false
+    N = n_allele(record) - 1
+    N==0 && return false
+    N>1 && return true
+    # skip ID and REF
+    offset = 24
+    len, offset = loadveclen(record.data, offset)
+    len, offset = loadveclen(record.data, offset + len)
+    # check if first (and only) ALT is '.'
+    return load(UInt8, rec.data, offset + len)[1] != 0x07
+end
+
 """
     filter(record::BCFRecord)::Vector{Int}
 Get the filter indexes of `record`.
@@ -328,6 +372,19 @@ function filter(record::BCFRecord)::Vector{Int}
     # load FILTER
     return loadvec(record.data, offset + len)[1] .+ 1
 end
+
+function hasfilter(record::BCFRecord)::Vector{Int}
+    isfilled(record) || return false
+    # skip ID, REF and ALTs
+    offset = 24
+    len = 0
+    for _ in 1:n_allele(record)+1
+        len, offset = loadveclen(record.data, offset + len)
+    end
+    # check if FILTER is '.'
+    load(UInt8, rec.data, offset + len)[1] != 0x07
+end
+
 
 """
     info(record::BCFRecord, [simplify::Bool=true])::Vector{Tuple{Int,Any}}
@@ -360,6 +417,11 @@ function info(record::BCFRecord; simplify::Bool=true)::Vector{Tuple{Int,Any}}
         ret[i] = (key[1], val)
     end
     return ret
+end
+
+function hasinfo(record::BCFRecord)
+    isfilled(record) || return false
+    return n_info(record)>0
 end
 
 """
@@ -397,6 +459,32 @@ function info(record::BCFRecord, key::Integer; simplify::Bool=true)
     end
     throw(KeyError(key))
 end
+
+function hasinfo(record::BCFRecord, key::Integer)
+    isfilled(record) || return false
+    n_info(record)==0 && return false # early out
+
+    # skip ID, REF, ALTs and FILTER
+    offset::Int = 24
+    len = 0
+    for _ in 1:n_allele(record) + 2
+        len, offset = loadveclen(record.data, offset + len)
+    end
+    offset += len
+    # look for key in INFO
+    for _ in 1:n_info(record)
+        k, offset = loadvec(record.data, offset)
+        @assert length(k) == 1
+        if k[1] == key
+            return true
+        else
+            offset = skipvec(record.data, offset)
+        end
+    end
+    return false
+end
+
+
 
 """
     genotype(record::BCFRecord)::Vector{Tuple{Int,Vector{Any}}}
@@ -472,6 +560,14 @@ end
 function genotype(record::BCFRecord, ::Colon, key::Integer)
     return genotype(record, 1:n_sample(record), key)
 end
+
+
+function hasformat(record::BCFRecord)
+    isfilled(record) || return false
+    return n_format(record)>0
+end
+
+
 
 function gt(x::Int8)
     allele = (x >> 1) - 1

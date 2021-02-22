@@ -555,6 +555,7 @@ Get the length of `record` projected onto the reference sequence.
 """
 function rlen(record::VCFRecord)::Int
     checkfilled(record)
+    # TODO: this is incorrect if there are symbolic alleles. (In that case, it should be computed using the END info attribute.)
     return length(record.ref_)
 end
 
