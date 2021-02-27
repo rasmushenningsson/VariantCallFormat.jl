@@ -8,6 +8,7 @@ mutable struct BCFRecord <: AbstractRecord
     # dictionary of strings to decode strings stored as integers
     strings::Vector{String}
     string2index::Dict{String,Int}
+    contigs::Vector{String}
 end
 
 """
@@ -15,7 +16,7 @@ end
 Create an unfilled BCF record.
 """
 function BCFRecord()
-    return BCFRecord(UInt8[], 1:0, 0, 0, String[], Dict{String,Int}())
+    return BCFRecord(UInt8[], 1:0, 0, 0, String[], Dict{String,Int}(), String[])
 end
 
 function isfilled(record::BCFRecord)
@@ -44,7 +45,7 @@ function Base.:(==)(record1::BCFRecord, record2::BCFRecord)
 end
 
 function Base.copy(record::BCFRecord)
-    return BCFRecord(record.data[record.filled], record.filled, record.sharedlen, record.indivlen, record.strings, record.string2index)
+    return BCFRecord(record.data[record.filled], record.filled, record.sharedlen, record.indivlen, record.strings, record.string2index, record.contigs)
 end
 
 function BCFRecord(base::BCFRecord;
@@ -176,7 +177,7 @@ function BCFRecord(base::BCFRecord;
         error("modifying genotype is not yet supported")
     end
 
-    return BCFRecord(data, 1:lastindex(data), sharedlen, offset - sharedlen, base.strings, base.string2index)
+    return BCFRecord(data, 1:lastindex(data), sharedlen, offset - sharedlen, base.strings, base.string2index, base.contigs)
 end
 
 function Base.show(io::IO, record::BCFRecord)
@@ -203,10 +204,18 @@ end
 # ------------------
 
 """
-    chrom(record::BCFRecord)::Int
+    chrom(record::BCFRecord)::String
+Get the chromosome name of `record`.
+"""
+function chrom(record::BCFRecord)::String
+    return record.contigs[rawchrom(record)]
+end
+
+"""
+    rawchrom(record::BCFRecord)::Int
 Get the chromosome index of `record`.
 """
-function chrom(record::BCFRecord)::Int
+function rawchrom(record::BCFRecord)::Int
     checkfilled(record)
     return load(Int32, record.data, 0)[1] % Int + 1
 end

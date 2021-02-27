@@ -4,6 +4,7 @@ struct BCFReader{T<:IO} <: BioCore.IO.AbstractReader
     stream::BGZFStreams.BGZFStream{T}
     strings::Vector{String} # BCF "Dictionary of Strings"
     string2index::Dict{String,Int} # reverse direction
+    contigs::Vector{String} # BCF "Dictionary of Contigs"
 end
 
 """
@@ -39,19 +40,27 @@ function BCFReader(input::IO)
 
     # create BCF "Dictionary of Strings" data structures
     string2index = Dict{String,Int}()
+    contig2index = Dict{String,Int}() # TODO: get rid of this?
     for minfo in metainfo(header)
         if isequaltag(minfo,"INFO") || isequaltag(minfo,"FORMAT") || isequaltag(minfo,"FILTER")
             idx = parse(Int,minfo["IDX"]) # TODO: support header without IDX tags
             string2index[minfo["ID"]] = idx
+        elseif isequaltag(minfo,"contig")
+            idx = parse(Int,minfo["IDX"]) # TODO: support header without IDX tags
+            contig2index[minfo["ID"]] = idx
         end
     end
     get!(string2index, "PASS", 0) == 0 || error("Invalid BCF file. PASS must have IDX 0.")
-    strings = fill("", maximum(values(string2index)))
+    strings = fill("", maximum(values(string2index))+1)
     for (str,idx) in string2index
-        idx==0 || (strings[idx] = str)
+        strings[idx+1] = str
+    end
+    contigs = fill("", maximum(values(contig2index))+1)
+    for (contig,idx) in contig2index
+        contigs[idx+1] = contig
     end
 
-    return BCFReader((major, minor), header, stream, strings, string2index)
+    return BCFReader((major, minor), header, stream, strings, string2index, contigs)
 end
 
 function Base.eltype(::Type{BCFReader{T}}) where T
@@ -81,5 +90,6 @@ function Base.read!(reader::BCFReader, record::BCFRecord)
     record.indivlen = indivlen
     record.strings = reader.strings
     record.string2index = reader.string2index
+    record.contigs = reader.contigs
     return record
 end
