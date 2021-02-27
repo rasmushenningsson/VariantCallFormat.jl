@@ -86,8 +86,8 @@ module BCF
 
 	const alt = VariantCallFormat.alt
 	const chrom = VariantCallFormat.chrom_index
-	const filter = VariantCallFormat.filter
-	# const format = VariantCallFormat.format # TODO: implement
+	const filter = VariantCallFormat.filter_index
+	const format = VariantCallFormat.format
 	const genotype = VariantCallFormat.genotype
 	const hasalt = VariantCallFormat.hasalt
 	const haschrom = VariantCallFormat.haschrom

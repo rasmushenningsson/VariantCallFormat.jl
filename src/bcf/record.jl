@@ -372,11 +372,20 @@ function hasalt(record::BCFRecord)
     return load(UInt8, record.data, offset + len)[1] != 0x07
 end
 
+
 """
-    filter(record::BCFRecord)::Vector{Int}
+    filter(record::VCFRecord)::Vector{String}
+Get the filter status of `record`.
+"""
+function filter(record::BCFRecord)::Vector{String}
+    return record.strings[filter_index(record)]
+end
+
+"""
+    filter_index(record::BCFRecord)::Vector{Int}
 Get the filter indexes of `record`.
 """
-function filter(record::BCFRecord)::Vector{Int}
+function filter_index(record::BCFRecord)::Vector{Int}
     checkfilled(record)
     # skip ID, REF and ALTs
     offset = 24
