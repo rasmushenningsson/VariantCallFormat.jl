@@ -5,6 +5,9 @@ mutable struct BCFRecord <: AbstractRecord
     # fields
     sharedlen::UInt32
     indivlen::UInt32
+    # dictionary of strings to decode strings stored as integers
+    strings::Vector{String}
+    string2index::Dict{String,Int}
 end
 
 """
@@ -12,7 +15,7 @@ end
 Create an unfilled BCF record.
 """
 function BCFRecord()
-    return BCFRecord(UInt8[], 1:0, 0, 0)
+    return BCFRecord(UInt8[], 1:0, 0, 0, String[], Dict{String,Int}())
 end
 
 function isfilled(record::BCFRecord)
@@ -29,6 +32,7 @@ function checkfilled(record::BCFRecord)
     end
 end
 
+# only valid for BCFRecord from the same BCF file, because otherwise string encoding can differ
 function Base.:(==)(record1::BCFRecord, record2::BCFRecord)
     if isfilled(record1) == isfilled(record2) == true
         r1 = datarange(record1)
@@ -40,7 +44,7 @@ function Base.:(==)(record1::BCFRecord, record2::BCFRecord)
 end
 
 function Base.copy(record::BCFRecord)
-    return BCFRecord(record.data[record.filled], record.filled, record.sharedlen, record.indivlen)
+    return BCFRecord(record.data[record.filled], record.filled, record.sharedlen, record.indivlen, record.strings, record.string2index)
 end
 
 function BCFRecord(base::BCFRecord;
@@ -172,21 +176,23 @@ function BCFRecord(base::BCFRecord;
         error("modifying genotype is not yet supported")
     end
 
-    return BCFRecord(data, 1:lastindex(data), sharedlen, offset - sharedlen)
+    return BCFRecord(data, 1:lastindex(data), sharedlen, offset - sharedlen, base.strings, base.string2index)
 end
 
 function Base.show(io::IO, record::BCFRecord)
     print(io, summary(record), ':')
     if isfilled(record)
         println(io)
-        println(io, "   chromosome: ", chrom(record))
-        println(io, "     position: ", pos(record))
-        println(io, "   identifier: ", id(record))
-        println(io, "    reference: ", ref(record))
-        println(io, "    alternate: ", join(alt(record), ' '))
-        println(io, "      quality: ", qual(record))
-        println(io, "       filter: ", join(filter(record), ' '))
-          print(io, "  information: ", info(record))
+        println(io, "   chromosome: ", record.chrom)
+        println(io, "     position: ", record.pos)
+        println(io, "   identifier: ", record.id)
+        println(io, "    reference: ", record.ref)
+        println(io, "    alternate: ", join(record.alt, ' '))
+        println(io, "      quality: ", record.qual)
+        println(io, "       filter: ", join(record.filter, ' '))
+        println(io, "  information: ", info(record))
+          print(io, "       format: ", hasformat(record) ? join(record.format, " ") : "<missing>")
+        # TODO: genotype
     else
         print(io, " <not filled>")
     end
@@ -484,6 +490,30 @@ function hasinfo(record::BCFRecord, key::Integer)
     return false
 end
 
+
+"""
+    format(record::BCFRecord)::Vector{String}
+Get the genotype format of `record`.
+"""
+function format(record::BCFRecord)::Vector{String}
+    checkfilled(record)
+    offset::Int = record.sharedlen
+    N = n_sample(record)
+    nf = n_format(record)
+    ret = String[]
+    sizehint!(ret, nf)
+    for j in 1:nf
+        key, offset = loadvec(record.data, offset)
+        @assert length(key) == 1
+        head, offset = loadvechead(record.data, offset)
+        vals = Vector{Any}[]
+        for i in 1:N
+            val, offset = loadvecbody(record.data, offset, head)
+        end
+        push!(ret, record.strings[key[1]])
+    end
+    ret
+end
 
 
 """

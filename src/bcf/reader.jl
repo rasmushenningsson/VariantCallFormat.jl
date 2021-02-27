@@ -2,6 +2,8 @@ struct BCFReader{T<:IO} <: BioCore.IO.AbstractReader
     version::Tuple{UInt8,UInt8}  # (major, minor)
     header::VCFHeader
     stream::BGZFStreams.BGZFStream{T}
+    strings::Vector{String} # BCF "Dictionary of Strings"
+    string2index::Dict{String,Int} # reverse direction
 end
 
 """
@@ -27,13 +29,29 @@ function BCFReader(input::IO)
 
     # NOTE: This isn't specified in the BCF specs, but seems to be a practice at least in htslib.
     # See: https://github.com/samtools/hts-specs/issues/138
-    l_header = read(stream, Int32)
+    # It is mentioned in the BCF quick reference: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
+    l_header = read(stream, UInt32)
     data = read(stream, l_header)
 
     # parse VCF header
     vcfreader = VCFReader(BufferedStreams.BufferedInputStream(data))
+    header = vcfreader.header
 
-    return BCFReader((major, minor), vcfreader.header, stream)
+    # create BCF "Dictionary of Strings" data structures
+    string2index = Dict{String,Int}()
+    for minfo in metainfo(header)
+        if isequaltag(minfo,"INFO") || isequaltag(minfo,"FORMAT") || isequaltag(minfo,"FILTER")
+            idx = parse(Int,minfo["IDX"]) # TODO: support header without IDX tags
+            string2index[minfo["ID"]] = idx
+        end
+    end
+    get!(string2index, "PASS", 0) == 0 || error("Invalid BCF file. PASS must have IDX 0.")
+    strings = fill("", maximum(values(string2index)))
+    for (str,idx) in string2index
+        idx==0 || (strings[idx] = str)
+    end
+
+    return BCFReader((major, minor), header, stream, strings, string2index)
 end
 
 function Base.eltype(::Type{BCFReader{T}}) where T
@@ -61,5 +79,7 @@ function Base.read!(reader::BCFReader, record::BCFRecord)
     record.filled = 1:datalen
     record.sharedlen = sharedlen
     record.indivlen = indivlen
+    record.strings = reader.strings
+    record.string2index = reader.string2index
     return record
 end
