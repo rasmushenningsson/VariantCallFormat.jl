@@ -208,14 +208,14 @@ end
 Get the chromosome name of `record`.
 """
 function chrom(record::BCFRecord)::String
-    return record.contigs[rawchrom(record)]
+    return record.contigs[chrom_index(record)]
 end
 
 """
-    rawchrom(record::BCFRecord)::Int
+    chrom_index(record::BCFRecord)::Int
 Get the chromosome index of `record`.
 """
-function rawchrom(record::BCFRecord)::Int
+function chrom_index(record::BCFRecord)::Int
     checkfilled(record)
     return load(Int32, record.data, 0)[1] % Int + 1
 end

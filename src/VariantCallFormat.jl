@@ -85,7 +85,7 @@ module BCF
 	import VariantCallFormat
 
 	const alt = VariantCallFormat.alt
-	const chrom = VariantCallFormat.rawchrom
+	const chrom = VariantCallFormat.chrom_index
 	const filter = VariantCallFormat.filter
 	# const format = VariantCallFormat.format # TODO: implement
 	const genotype = VariantCallFormat.genotype
