@@ -519,7 +519,7 @@ function format(record::BCFRecord)::Vector{String}
         for i in 1:N
             val, offset = loadvecbody(record.data, offset, head)
         end
-        push!(ret, record.strings[key[1]])
+        push!(ret, record.strings[key[1]+1])
     end
     ret
 end
