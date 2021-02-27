@@ -183,14 +183,14 @@ function Base.show(io::IO, record::BCFRecord)
     print(io, summary(record), ':')
     if isfilled(record)
         println(io)
-        println(io, "   chromosome: ", record.chrom)
-        println(io, "     position: ", record.pos)
-        println(io, "   identifier: ", record.id)
-        println(io, "    reference: ", record.ref)
-        println(io, "    alternate: ", join(record.alt, ' '))
-        println(io, "      quality: ", record.qual)
-        println(io, "       filter: ", join(record.filter, ' '))
-        println(io, "  information: ", info(record))
+        println(io, "   chromosome: ", haschrom(record) ? record.chrom : "<missing>")
+        println(io, "     position: ", haspos(record) ? record.pos : "<missing>")
+        println(io, "   identifier: ", hasid(record) ? record.id : "<missing>")
+        println(io, "    reference: ", hasref(record) ? record.ref : "<missing>")
+        println(io, "    alternate: ", hasalt(record) ? join(record.alt, ' ') : "<missing>")
+        println(io, "      quality: ", hasqual(record) ? record.qual : "<missing>")
+        println(io, "       filter: ", hasfilter(record) ? join(record.filter, ' ') : "<missing>")
+        println(io, "  information: ", hasinfo(record) ? info(record) : "<missing>")
           print(io, "       format: ", hasformat(record) ? join(record.format, " ") : "<missing>")
         # TODO: genotype
     else
@@ -259,50 +259,50 @@ end
     n_allele(record::BCFRecord)::Int
 Get the number of alleles for `record`, counting ref and each alt.
 """
-function n_allele(rec::BCFRecord)
-    checkfilled(rec)
-    return (load(Int32, rec.data, 16)[1] >> 16) % Int
+function n_allele(record::BCFRecord)
+    checkfilled(record)
+    return (load(Int32, record.data, 16)[1] >> 16) % Int
 end
 
 """
     n_info(record::BCFRecord)::Int
 Get the number of info entries for `record`.
 """
-function n_info(rec::BCFRecord)
-    checkfilled(rec)
-    return (load(Int32, rec.data, 16)[1] & 0x0000FFFF) % Int
+function n_info(record::BCFRecord)
+    checkfilled(record)
+    return (load(Int32, record.data, 16)[1] & 0x0000FFFF) % Int
 end
 
 """
     n_format(record::BCFRecord)::Int
 Get the number of format entries for `record`.
 """
-function n_format(rec::BCFRecord)
-    checkfilled(rec)
-    return (load(UInt32, rec.data, 20)[1] >> 24) % Int
+function n_format(record::BCFRecord)
+    checkfilled(record)
+    return (load(UInt32, record.data, 20)[1] >> 24) % Int
 end
 
 """
     n_sample(record::BCFRecord)::Int
 Get the number of samples for `record`.
 """
-function n_sample(rec::BCFRecord)
-    checkfilled(rec)
-    return (load(UInt32, rec.data, 20)[1] & 0x00FFFFFF) % Int
+function n_sample(record::BCFRecord)
+    checkfilled(record)
+    return (load(UInt32, record.data, 20)[1] & 0x00FFFFFF) % Int
 end
 
 """
     id(record::BCFRecord)::Vector{String}
 Get the identifiers of `record`.
 """
-function id(rec::BCFRecord)
-    checkfilled(rec)
+function id(record::BCFRecord)
+    checkfilled(record)
     offset = 24
-    return loadstr(rec.data, offset)[1]
+    return loadstr(record.data, offset)[1]
 end
 
 function hasid(record::BCFRecord)
-    return isfilled(record) && load(UInt8, rec.data, 24)[1] != 0x07
+    return isfilled(record) && load(UInt8, record.data, 24)[1] != 0x07
 end
 
 
@@ -324,7 +324,7 @@ function hasref(record::BCFRecord)
     # skip ID
     offset = 24
     len, offset = loadveclen(record.data, offset)
-    return load(UInt8, rec.data, offset + len)[1] != 0x07
+    return load(UInt8, record.data, offset + len)[1] != 0x07
 end
 
 
@@ -360,7 +360,7 @@ function hasalt(record::BCFRecord)
     len, offset = loadveclen(record.data, offset)
     len, offset = loadveclen(record.data, offset + len)
     # check if first (and only) ALT is '.'
-    return load(UInt8, rec.data, offset + len)[1] != 0x07
+    return load(UInt8, record.data, offset + len)[1] != 0x07
 end
 
 """
@@ -379,7 +379,7 @@ function filter(record::BCFRecord)::Vector{Int}
     return loadvec(record.data, offset + len)[1] .+ 1
 end
 
-function hasfilter(record::BCFRecord)::Vector{Int}
+function hasfilter(record::BCFRecord)
     isfilled(record) || return false
     # skip ID, REF and ALTs
     offset = 24
@@ -388,7 +388,7 @@ function hasfilter(record::BCFRecord)::Vector{Int}
         len, offset = loadveclen(record.data, offset + len)
     end
     # check if FILTER is '.'
-    load(UInt8, rec.data, offset + len)[1] != 0x07
+    return load(UInt8, record.data, offset + len)[1] != 0x07
 end
 
 
