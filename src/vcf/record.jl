@@ -564,7 +564,7 @@ end
 Get the number of alleles for `record`, counting ref and each alt.
 """
 function n_allele(record::VCFRecord)
-    checkfilled(rec)
+    checkfilled(record)
     return length(record.alt_)
 end
 
@@ -573,7 +573,7 @@ end
 Get the number of info entries for `record`.
 """
 function n_info(record::VCFRecord)
-    checkfilled(rec)
+    checkfilled(record)
     return length(record.infokey_)
 end
 
@@ -582,7 +582,7 @@ end
 Get the number of format entries for `record`.
 """
 function n_format(record::VCFRecord)
-    checkfilled(rec)
+    checkfilled(record)
     return length(record.format_)
 end
 
@@ -591,7 +591,7 @@ end
 Get the number of samples for `record`.
 """
 function n_sample(record::VCFRecord)
-    checkfilled(rec)
+    checkfilled(record)
     return length(record.genotype_)
 end
 
@@ -603,13 +603,13 @@ function Base.show(io::IO, record::VCFRecord)
     print(io, summary(record), ':')
     if isfilled(record)
         println(io)
-        println(io, "   chromosome: ", haschrom(record) ? chrom(record) : "<missing>")
-        println(io, "     position: ", haspos(record) ? pos(record) : "<missing>")
-        println(io, "   identifier: ", hasid(record) ? join(id(record), " ") : "<missing>")
-        println(io, "    reference: ", hasref(record) ? ref(record) : "<missing>")
-        println(io, "    alternate: ", hasalt(record) ? join(alt(record), " ") : "<missing>")
-        println(io, "      quality: ", hasqual(record) ? qual(record) : "<missing>")
-        println(io, "       filter: ", hasfilter(record) ? join(filter(record), " ") : "<missing>")
+        println(io, "   chromosome: ", haschrom(record) ? record.chrom : "<missing>")
+        println(io, "     position: ", haspos(record) ? record.pos : "<missing>")
+        println(io, "   identifier: ", hasid(record) ? join(record.id, " ") : "<missing>")
+        println(io, "    reference: ", hasref(record) ? record.ref : "<missing>")
+        println(io, "    alternate: ", hasalt(record) ? join(record.alt, " ") : "<missing>")
+        println(io, "      quality: ", hasqual(record) ? record.qual : "<missing>")
+        println(io, "       filter: ", hasfilter(record) ? join(record.filter, " ") : "<missing>")
           print(io, "  information: ")
         if hasinfo(record)
             for (key, val) in record.info
@@ -623,12 +623,15 @@ function Base.show(io::IO, record::VCFRecord)
             print(io, "<missing>")
         end
         println(io)
-          print(io, "       format: ", hasformat(record) ? join(format(record), " ") : "<missing>")
+          print(io, "       format: ", hasformat(record) ? join(record.format, " ") : "<missing>")
         if hasformat(record)
             println(io)
             print(io, "     genotype:")
-            for i in 1:lastindex(record.genotype_)
-                print(io, " [$(i)] ", let x = genotype(record, i); isempty(x) ? "." : join(x, " "); end)
+            for i in 1:n_sample(record)
+                print(io, " [$i]")
+                for k in 1:n_format(record)
+                    print(io, ' ', record.genotype[i,k])
+                end
             end
         end
     else
