@@ -205,7 +205,16 @@ function Base.show(io::IO, record::BCFRecord)
         end
         println(io)
           print(io, "       format: ", hasformat(record) ? join(record.format, " ") : "<missing>")
-        # TODO: genotype
+        if hasformat(record)
+            println(io)
+            print(io, "     genotype:")
+            for i in 1:n_sample(record)
+                print(io, " [$i]")
+                for k in 1:n_format(record)
+                    print(io, ' ', record.genotype[i,k])
+                end
+            end
+        end
     else
         print(io, " <not filled>")
     end
@@ -629,7 +638,7 @@ end
 
 
 
-function gt(x::Int8)
+function gt(x::Integer)
     allele = (x >> 1) - 1
     phased = x & 1 != 0
     return allele, phased

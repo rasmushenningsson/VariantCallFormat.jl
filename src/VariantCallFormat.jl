@@ -40,6 +40,7 @@ include("vcf/writer.jl")
 
 include("bcf/record.jl")
 include("bcf/infodict.jl")
+include("bcf/genotypematrix.jl")
 include("bcf/reader.jl")
 include("bcf/writer.jl")
 
