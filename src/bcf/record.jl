@@ -191,7 +191,19 @@ function Base.show(io::IO, record::BCFRecord)
         println(io, "    alternate: ", hasalt(record) ? join(record.alt, ' ') : "<missing>")
         println(io, "      quality: ", hasqual(record) ? record.qual : "<missing>")
         println(io, "       filter: ", hasfilter(record) ? join(record.filter, ' ') : "<missing>")
-        println(io, "  information: ", hasinfo(record) ? info(record) : "<missing>")
+          print(io, "  information: ")
+        if hasinfo(record)
+            for (key, val) in record.info
+                print(io, key)
+                if !isempty(val)
+                    print(io, '=', val)
+                end
+                print(io, ' ')
+            end
+        else
+            print(io, "<missing>")
+        end
+        println(io)
           print(io, "       format: ", hasformat(record) ? join(record.format, " ") : "<missing>")
         # TODO: genotype
     else
