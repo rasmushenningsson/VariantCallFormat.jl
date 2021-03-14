@@ -1,8 +1,12 @@
 # TODO: handle missing values
-function parse_vcf_value(::Type{T}, data::Vector{UInt8}, val::UnitRange{Int}) where T<:Real
+function parse_vcf_value(::Type{T}, data::Vector{UInt8}, val::UnitRange{Int})::Union{T,Missing} where T<:Real
+    length(val)==1 && data[first(val)]==UInt8('.') && return missing
     parse(T, String(data[val])) # TODO: avoid creating String as intermediate
 end
-parse_vcf_value(::Type{String}, data::Vector{UInt8}, val::UnitRange{Int}) = String(data[val])
+function parse_vcf_value(::Type{String}, data::Vector{UInt8}, val::UnitRange{Int})::Union{String,Missing}
+    length(val)==1 && data[first(val)]==UInt8('.') && return missing
+    String(data[val])
+end
 
 
 
@@ -12,18 +16,23 @@ struct VCFValue
 end
 
 Base.isempty(v::VCFValue) = isempty(v.val)
-isvector(v::VCFValue) = findfirst(==(','), view(v.data,v.val)) === nothing
-checkscalar(v::VCFValue) = isvector(v) || error("getvalue() expected a single value, but found a vector. Did you want getvector()?")
+isvector(v::VCFValue) = findfirst(==(UInt8(',')), view(v.data,v.val)) !== nothing
+checkscalar(v::VCFValue) = isvector(v) && error("getvalue() expected a single value, but found a vector. Did you want getvector()?")
 
 Base.string(v::VCFValue) = String(v.data[v.val])
 Base.show(io::IO, v::VCFValue) = print(io,string(v))
 
 
 
-getvalue(v::VCFValue) = string(v) # TODO: Should convert to type specified in VCF header (default to String if not specified in header)
+function getvalue(v::VCFValue)
+    # TODO: Should convert to type specified in VCF header (default to String if not specified in header)
+    isvector(v) && return getvector(String,v)
+    string(v)
+end
 getvalue(::Type{T}, v::VCFValue) where T = (checkscalar(v); parse_vcf_value(T, v.data, v.val))
 
 getvector(::Type{T}, v::VCFValue) where T = VCFVector(T, v.data, v.val)
+getvector(v::VCFValue) = getvector(String,v) # TODO: should use type specified in VCF header (default to String if not specified in header)
 
 
 
@@ -35,17 +44,16 @@ struct VCFVector{T} <: AbstractVector{Union{T,Missing}}
     vals::Vector{UnitRange{Int}}
 end
 function VCFVector(::Type{T}, data::Vector{UInt8}, val::UnitRange{Int}) where T
-	vals = UnitRange{Int}[]
-	i = first(val)
-	while true
-		i2 = findnext(==(','), view(data,val), i)
-		i2 === nothing && break
-		i2 += first(val)-1
-		push!(vals, i:i2-1)
-		i = i2+1
-	end
-	push!(vals,i:last(val))
-	VCFVector{T}(data, vals)
+    vals = UnitRange{Int}[]
+    i = 1
+    while true
+        i2 = findnext(==(UInt8(',')), view(data,val), i)
+        i2 === nothing && break
+        push!(vals, (i:i2-1) .+ (first(val)-1))
+        i = i2+1
+    end
+    push!(vals,first(val)-1+i:last(val))
+    VCFVector{T}(data, vals)
 end
 
 # AbstractVector interface

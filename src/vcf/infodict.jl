@@ -4,8 +4,8 @@ struct VCFInfoDict <: AbstractDict{String,VCFValue}
 end
 
 function VCFInfoDict(record::VCFRecord)
-	checkfilled(record)
-	VCFInfoDict(record.data, record.infokey_)
+    checkfilled(record)
+    VCFInfoDict(record.data, record.infokey_)
 end
 
 infodict(record::VCFRecord) = VCFInfoDict(record)
@@ -35,16 +35,17 @@ end
 
 
 
-getvalue(vinfo::VCFInfoDict, key::String) = getvalue(vinfo[key])
 getvalue(::Type{T}, vinfo::VCFInfoDict, key::String) where T = getvalue(T, vinfo[key])
+getvalue(vinfo::VCFInfoDict, key::String) = getvalue(vinfo[key])
 getvector(::Type{T}, vinfo::VCFInfoDict, key::String) where T = getvector(T, vinfo[key])
+getvector(vinfo::VCFInfoDict, key::String) = getvector(vinfo[key])
 
 
 
 
 
 function findinfokey(vinfo::VCFInfoDict, key::String)
-	findfirst(x->isequaldata(key,vinfo.data,x), vinfo.infokey)
+    findfirst(x->isequaldata(key,vinfo.data,x), vinfo.infokey)
 end
 
 

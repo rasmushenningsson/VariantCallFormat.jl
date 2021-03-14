@@ -5,8 +5,8 @@ struct VCFGenotypeMatrix <: AbstractMatrix{VCFValue}
 end
 
 function VCFGenotypeMatrix(record::VCFRecord)
-	checkfilled(record)
-	VCFGenotypeMatrix(record.data, record.format_, record.genotype_)
+    checkfilled(record)
+    VCFGenotypeMatrix(record.data, record.format_, record.genotype_)
 end
 
 genotypematrix(record::VCFRecord) = VCFGenotypeMatrix(record)
@@ -25,9 +25,10 @@ Base.getindex(g::VCFGenotypeMatrix, I, key::AbstractVector{String}) = g[I,findge
 
 
 
-getvalue(g::VCFGenotypeMatrix, i::Integer, key::String) = getvalue(g[i,key])
 getvalue(::Type{T}, g::VCFGenotypeMatrix, i::Integer, key::String) where T = getvalue(T, g[i,key])
+getvalue(g::VCFGenotypeMatrix, i::Integer, key::String) = getvalue(g[i,key])
 getvector(::Type{T}, g::VCFGenotypeMatrix, i::Integer, key::String) where T = getvector(T, g[i,key])
+getvector(g::VCFGenotypeMatrix, i::Integer, key::String) = getvector(g[i,key])
 
 
 
