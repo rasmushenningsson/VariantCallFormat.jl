@@ -25,7 +25,7 @@ Base.getindex(g::VCFGenotypeMatrix, I, key::AbstractVector{String}) = g[I,findge
 
 
 
-getvalue(g::VCFGenotypeMatrix, i::Integer, key::String) = string(g[i,key]) # TODO: Should convert to type specified in VCF header (default to String if not specified in header)
+getvalue(g::VCFGenotypeMatrix, i::Integer, key::String) = getvalue(g[i,key])
 getvalue(::Type{T}, g::VCFGenotypeMatrix, i::Integer, key::String) where T = getvalue(T, g[i,key])
 getvector(::Type{T}, g::VCFGenotypeMatrix, i::Integer, key::String) where T = getvector(T, g[i,key])
 

@@ -35,7 +35,7 @@ end
 
 
 
-getvalue(vinfo::VCFInfoDict, key::String) = string(vinfo[key]) # TODO: Should convert to type specified in VCF header (default to String if not specified in header)
+getvalue(vinfo::VCFInfoDict, key::String) = getvalue(vinfo[key])
 getvalue(::Type{T}, vinfo::VCFInfoDict, key::String) where T = getvalue(T, vinfo[key])
 getvector(::Type{T}, vinfo::VCFInfoDict, key::String) where T = getvector(T, vinfo[key])
 
