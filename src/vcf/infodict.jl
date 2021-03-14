@@ -54,9 +54,9 @@ function infovalrange(vinfo::VCFInfoDict, i::Int)
     data = vinfo.data
     key = vinfo.infokey[i]
     if last(key) + 1 ≤ lastindex(data) && data[last(key)+1] == UInt8('=')
-        endpos = something(findnext(isequal(0x3B), data, last(key)+1), 0) # 0x3B is byte equivalent of char ';'.
+        endpos = something(findnext(==(UInt8(';')), data, last(key)+1), 0)
         if endpos == 0
-            endpos = something(findnext(isequal(0x09), data, last(key)+1), 0) # 0x09 is byte equivalent of char '\t'
+            endpos = something(findnext(==(UInt8('\t')), data, last(key)+1), 0)
             @assert endpos != 0
         end
         return last(key)+2:endpos-1
