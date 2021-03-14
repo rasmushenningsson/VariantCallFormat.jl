@@ -16,6 +16,7 @@ isvector(v::VCFValue) = findfirst(==(','), view(v.data,v.val)) === nothing
 checkscalar(v::VCFValue) = isvector(v) || error("getvalue() expected a single value, but found a vector. Did you want getvector()?")
 
 Base.string(v::VCFValue) = String(v.data[v.val])
+Base.show(io::IO, v::VCFValue) = print(io,string(v))
 
 
 

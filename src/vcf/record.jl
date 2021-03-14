@@ -615,7 +615,7 @@ function Base.show(io::IO, record::VCFRecord)
             for (key, val) in record.info
                 print(io, key)
                 if !isempty(val)
-                    print(io, '=', string(val))
+                    print(io, '=', val)
                 end
                 print(io, ' ')
             end
@@ -630,7 +630,7 @@ function Base.show(io::IO, record::VCFRecord)
             for i in 1:n_sample(record)
                 print(io, " [$i]")
                 for k in 1:n_format(record)
-                    print(io, ' ', string(record.genotype[i,k]))
+                    print(io, ' ', record.genotype[i,k])
                 end
             end
         end
