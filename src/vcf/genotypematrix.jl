@@ -33,7 +33,7 @@ getvector(::Type{T}, g::VCFGenotypeMatrix, i::Integer, key::String) where T = ge
 
 
 function findgenokey(g::VCFGenotypeMatrix, key::String)
-    j = findfirst(r -> isequaldata(key, g.data, r), g.format)
+    j = findfirst(x -> isequaldata(key, g.data, x), g.format)
     j === nothing && throw(KeyError(key))
     j
 end
@@ -46,4 +46,3 @@ function genotype_impl(g::VCFGenotypeMatrix, index::Int, key::Int)
         return VCFValue(g.data,geno[key])
     end
 end
-
