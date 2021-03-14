@@ -508,7 +508,7 @@ end
 Get the genotypes of `record`.
 """
 function genotype(record::VCFRecord)
-    Vector{String}[ record.genotype[i,:] for i in 1:lastindex(record.genotype_)]
+    Vector{String}[ string.(record.genotype[i,:]) for i in 1:lastindex(record.genotype_)]
 end
 
 """
@@ -517,7 +517,7 @@ Get the genotypes of the `index`-th individual in `record`.
 This is effectively equivalent to `genotype(record)[index]` but more efficient.
 """
 function genotype(record::VCFRecord, index::Integer)
-    return record.genotype[index,:]
+    return string.(record.genotype[index,:])
 end
 
 """
@@ -527,26 +527,26 @@ Get the genotypes in `record` that match `indexes` and `keys`.
 Trailing fields that are dropped are filled with `"."`.
 """
 function genotype(record::VCFRecord, index::Integer, key::String)::String
-    return record.genotype[index,key]
+    return string(record.genotype[index,key])
 end
 
 function genotype(record::VCFRecord, index::Integer, keys::AbstractVector{String})::Vector{String}
-    return record.genotype[index,keys]
+    return string.(record.genotype[index,keys])
 end
 
 function genotype(record::VCFRecord, indexes::AbstractVector{T}, key::String)::Vector{String} where T<:Integer
-    return record.genotype[indexes,key]
+    return string.(record.genotype[indexes,key])
 end
 
 function genotype(record::VCFRecord, indexes::AbstractVector{T}, keys::AbstractVector{String})::Vector{Vector{String}} where T<:Integer
     # keep old (deprecated) behavior returning Vector{Vector{String}}
     g = record.genotype
     ks = findgenokey.(Ref(g),keys)
-    [ g[i, ks] for i in indexes ]
+    [ string.(g[i, ks]) for i in indexes ]
 end
 
 function genotype(record::VCFRecord, ::Colon, key::String)::Vector{String}
-    return record.genotype[:,key]
+    return string.(record.genotype[:,key])
 end
 
 """
@@ -630,7 +630,7 @@ function Base.show(io::IO, record::VCFRecord)
             for i in 1:n_sample(record)
                 print(io, " [$i]")
                 for k in 1:n_format(record)
-                    print(io, ' ', record.genotype[i,k])
+                    print(io, ' ', string(record.genotype[i,k]))
                 end
             end
         end
