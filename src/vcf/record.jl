@@ -453,7 +453,7 @@ function info(record::VCFRecord)::Vector{Pair{String,String}}
     if isempty(record.infokey_)
         missingerror(:info) # TODO: deprecate this behavior, it's OK with an empty dict.
     end
-    return collect(record.info)
+    return [ k=>string(v) for (k,v) in record.info ]
 end
 
 function hasinfo(record::VCFRecord)
@@ -466,7 +466,7 @@ Get the additional information of `record` with `key`.
 Keys without corresponding values return an empty string.
 """
 function info(record::VCFRecord, key::String)::String
-    return record.info[key]
+    return string(record.info[key])
 end
 
 function hasinfo(record::VCFRecord, key::String)
@@ -615,7 +615,7 @@ function Base.show(io::IO, record::VCFRecord)
             for (key, val) in record.info
                 print(io, key)
                 if !isempty(val)
-                    print(io, '=', val)
+                    print(io, '=', string(val))
                 end
                 print(io, ' ')
             end

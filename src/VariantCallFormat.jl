@@ -24,6 +24,8 @@ export
     metainfotag,
     metainfoval,
     isfilled,
+    getvalue,
+    getvector,
     MissingFieldException
 
 include("metainfo.jl")
