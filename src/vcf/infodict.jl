@@ -1,37 +1,4 @@
-# TODO: VCFInfoValue can share (most of the) implementation with VCFGenotypeValue
-struct VCFInfoValue
-    data::Vector{UInt8}
-    val::UnitRange{Int} # empty for flags (keys without value)
-end
-
-isempty(v::VCFInfoValue) = isempty(v.val)
-isvector(v::VCFInfoValue) = findfirst(==(','), view(v.data,v.val)) === nothing
-checkscalar(v::VCFInfoValue) = isvector(v) || error("getvalue() expected a single value, but found a vector. Did you want getvector()?")
-
-Base.string(v::VCFInfoValue) = String(v.data[v.val])
-
-
-# TODO: handle missing values
-function getvalue(::Type{T}, v::VCFInfoValue) where T<:Real
-    checkscalar(v)
-    parse(T, string(v)) # TODO: avoid creating String as intermediate
-end
-getvalue(::Type{String}, v::VCFInfoValue) = (checkscalar(v); string(v))
-
-
-
-# TODO: return VCFInfoVector
-# TODO: handle missing values
-getvector(::Type{T}, v::VCFInfoValue) where T<:Real =
-    parse.(T, split(string(v),',')) # TODO: avoid temp storage
-getvector(::Type{String}, v::VCFInfoValue) =
-    String.(split(string(v),',')) # TODO: avoid temp storage
-
-
-
-
-
-struct VCFInfoDict <: AbstractDict{String,VCFInfoValue}
+struct VCFInfoDict <: AbstractDict{String,VCFValue}
     data::Vector{UInt8}
     infokey::Vector{UnitRange{Int}}
 end
@@ -51,7 +18,7 @@ Base.haskey(vinfo::VCFInfoDict, key::String) = findinfokey(vinfo, key) !== nothi
 function Base.get(f, vinfo::VCFInfoDict, key::String)
     i = findinfokey(vinfo, key)
     i === nothing && return f()
-    VCFInfoValue(vinfo.data, infovalrange(vinfo, i))
+    VCFValue(vinfo.data, infovalrange(vinfo, i))
 end
 Base.get(vinfo::VCFInfoDict, key::String, default) = get(()->default, vinfo, key)
 Base.getindex(vinfo::VCFInfoDict, key::String) = get(()->throw(KeyError(key)), vinfo, key)
@@ -61,7 +28,7 @@ Base.length(vinfo::VCFInfoDict) = length(vinfo.infokey)
 function Base.iterate(vinfo::VCFInfoDict, i=1)
     i>length(vinfo) && return nothing
     key = String(vinfo.data[vinfo.infokey[i]])
-    val = VCFInfoValue(vinfo.data, infovalrange(vinfo, i))
+    val = VCFValue(vinfo.data, infovalrange(vinfo, i))
     return key=>val, i+1
 end
 # End AbstractDict interface

@@ -35,6 +35,7 @@ include("abstractrecord.jl")
 include("mem.jl")
 
 include("vcf/record.jl")
+include("vcf/value.jl")
 include("vcf/infodict.jl")
 include("vcf/genotypematrix.jl")
 include("vcf/reader.jl")
