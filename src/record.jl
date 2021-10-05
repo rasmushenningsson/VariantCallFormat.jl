@@ -515,8 +515,7 @@ function infovalrange(record::Record, i::Int)
     if last(key) + 1 ≤ lastindex(data) && data[last(key)+1] == UInt8('=')
         endpos = something(findnext(isequal(0x3B), data, last(key)+1), 0) # 0x3B is byte equivalent of char ';'.
         if endpos == 0
-            endpos = something(findnext(isequal(0x09), data, last(key)+1), 0) # 0x09 is byte equivalent of char '\t'
-            @assert endpos != 0
+            endpos = something(findnext(isequal(0x09), data, last(key)+1), length(data)+1) # 0x09 is byte equivalent of char '\t'
         end
         return last(key)+2:endpos-1
     else

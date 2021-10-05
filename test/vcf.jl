@@ -280,6 +280,24 @@
         end
         @test records == records2
     end
+
+    data = Vector{UInt8}("""
+    ##fileformat=VCFv4.3
+    ##INFO=<ID=DP,Number=1,Type=Integer,Description="Raw Depth">
+    ##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+    #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO
+    1\t11877\t.\tG\tA\t13\t.\tDP=43
+    1\t12000\t.\tC\tT\t.\t.\tDB
+    """)
+    reader = VCF.Reader(BufferedInputStream(data))
+
+    record = first(reader)
+    @test VCF.hasinfo(record, "DP")
+    @test VCF.info(record, "DP") == "43"
+
+    record = first(reader)
+    @test VCF.hasinfo(record, "DB")
+    @test VCF.info(record, "DB") == ""
 end
 
 function parsehex(str)
