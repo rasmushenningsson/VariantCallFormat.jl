@@ -1,7 +1,7 @@
 name = "VariantCallFormat"
 uuid = "28eba6e3-a997-4ad9-87c6-d933b8bca6c1"
 authors = ["Rasmus Henningsson <rasmus.henningsson@gmail.com>", "Lund University"]
-version = "0.5.2"
+version = "0.5.3"
 
 [deps]
 Automa = "67c07d97-cdcb-5c2c-af73-a7f9c32a568b"
@@ -10,7 +10,7 @@ BioCore = "37cfa864-2cd6-5c12-ad9e-b6597d696c81"
 BufferedStreams = "e1450e63-4bb3-523b-b2a4-4ffa8c0fd77d"
 
 [compat]
-Automa = "0.7, =0.8.0"
+Automa = "0.7, =0.8.0, 0.8.2"
 BGZFStreams = "0.3"
 BioCore = "2.0.5"
 BufferedStreams = "1"
