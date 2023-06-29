@@ -193,6 +193,35 @@
         @test header.sampleID == ["NA00001", "NA00002", "NA00003"]
     end
 
+    # header with hyphens
+    data = Vector{UInt8}("""
+    ##fileformat=VCFv4.3
+    ##GVCFBlock0-20=minGQ=0(inclusive),maxGQ=20(exclusive)
+    ##dict=<a-key="a-value">
+    #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE1
+    """)
+    reader = VCF.Reader(BufferedInputStream(data))
+    @test isa(header(reader), VCF.Header)
+
+    let header = header(reader)
+        @test length(header.metainfo) == 3
+
+        let metainfo = header.metainfo[2]
+            @test metainfotag(metainfo) == "GVCFBlock0-20"
+            @test metainfoval(metainfo) == "minGQ=0(inclusive),maxGQ=20(exclusive)"
+            @test_throws ArgumentError keys(metainfo)
+            @test_throws ArgumentError values(metainfo)
+        end
+
+        let metainfo = header.metainfo[3]
+            @test metainfotag(metainfo) == "dict"
+            @test metainfoval(metainfo) == """<a-key="a-value">"""
+            @test keys(metainfo) == ["a-key"]
+            @test values(metainfo) == ["a-value"]
+            @test metainfo["a-key"] == "a-value"
+        end
+    end
+
     data = Vector{UInt8}("""
     ##fileformat=VCFv4.3
     ##contig=<ID=chr1>
