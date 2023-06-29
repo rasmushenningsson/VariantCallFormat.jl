@@ -197,14 +197,15 @@
     data = Vector{UInt8}("""
     ##fileformat=VCFv4.3
     ##GVCFBlock0-20=minGQ=0(inclusive),maxGQ=20(exclusive)
-    ##dict=<a-key="a-value">
+    ##a+b=A+B
+    ##dict=<a-key="a-value",another+key="another+value">
     #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE1
     """)
     reader = VCF.Reader(BufferedInputStream(data))
     @test isa(header(reader), VCF.Header)
 
     let header = header(reader)
-        @test length(header.metainfo) == 3
+        @test length(header.metainfo) == 4
 
         let metainfo = header.metainfo[2]
             @test metainfotag(metainfo) == "GVCFBlock0-20"
@@ -212,13 +213,20 @@
             @test_throws ArgumentError keys(metainfo)
             @test_throws ArgumentError values(metainfo)
         end
-
         let metainfo = header.metainfo[3]
+            @test metainfotag(metainfo) == "a+b"
+            @test metainfoval(metainfo) == "A+B"
+            @test_throws ArgumentError keys(metainfo)
+            @test_throws ArgumentError values(metainfo)
+        end
+
+        let metainfo = header.metainfo[4]
             @test metainfotag(metainfo) == "dict"
-            @test metainfoval(metainfo) == """<a-key="a-value">"""
-            @test keys(metainfo) == ["a-key"]
-            @test values(metainfo) == ["a-value"]
+            @test metainfoval(metainfo) == """<a-key="a-value",another+key="another+value">"""
+            @test keys(metainfo) == ["a-key","another+key"]
+            @test values(metainfo) == ["a-value","another+value"]
             @test metainfo["a-key"] == "a-value"
+            @test metainfo["another+key"] == "another+value"
         end
     end
 

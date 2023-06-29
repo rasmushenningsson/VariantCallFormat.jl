@@ -62,7 +62,7 @@ const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_mac
 
     # All kinds of meta-information line after 'fileformat' are handled here.
     metainfo = let
-        tag = re"[0-9A-Za-z_\.\-]+"
+        tag = re"[0-9A-Za-z_\.\-\+]+"
         tag.actions[:enter] = [:mark1]
         tag.actions[:exit]  = [:metainfo_tag]
 
@@ -71,7 +71,7 @@ const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_mac
         str.actions[:exit]  = [:metainfo_val]
 
         dict = let
-            dictkey = re"[0-9A-Za-z_\-]+"
+            dictkey = re"[0-9A-Za-z_\-\+]+"
             dictkey.actions[:enter] = [:mark1]
             dictkey.actions[:exit]  = [:metainfo_dict_key]
 
