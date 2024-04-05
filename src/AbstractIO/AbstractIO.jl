@@ -3,13 +3,6 @@
 module AbstractIO
 
 """
-Abstract file format type.
-
-See `subtypes(FileFormat)` for all available file formats.
-"""
-abstract type FileFormat end
-
-"""
 Abstract formatted input/output type.
 """
 abstract type AbstractFormattedIO end
