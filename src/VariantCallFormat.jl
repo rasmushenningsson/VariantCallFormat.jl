@@ -16,6 +16,8 @@ export
     isfilled,
     MissingFieldException
 
+include("AbstractIO/AbstractIO.jl")
+
 include("record.jl")
 include("metainfo.jl")
 include("header.jl")
