@@ -1,5 +1,6 @@
 module VariantCallFormat
 
+using Automa: Automa, onenter!, onexit!, onfinal!, rep, opt, compile
 import Automa
 import Automa.RegExp: @re_str
 import BioGenerics: BioGenerics, isfilled, metainfotag, metainfoval, header
