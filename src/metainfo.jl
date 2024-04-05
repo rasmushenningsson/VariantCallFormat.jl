@@ -124,12 +124,12 @@ function isequaltag(metainfo::MetaInfo, tag::AbstractString)
            memcmp(pointer(metainfo.data, first(metainfo.tag)), pointer(tag), length(metainfo.tag)) == 0
 end
 
-function BioCore.metainfotag(metainfo::MetaInfo)
+function metainfotag(metainfo::MetaInfo)
     checkfilled(metainfo)
     return String(metainfo.data[metainfo.tag])
 end
 
-function BioCore.metainfoval(metainfo::MetaInfo)
+function metainfoval(metainfo::MetaInfo)
     checkfilled(metainfo)
     return String(metainfo.data[metainfo.val])
 end
@@ -182,14 +182,14 @@ function Base.show(io::IO, metainfo::MetaInfo)
     print(io, summary(metainfo), ':')
     if isfilled(metainfo)
         println(io)
-        println(io, "    tag: ", BioCore.metainfotag(metainfo))
+        println(io, "    tag: ", metainfotag(metainfo))
         print(io, "  value:")
         if metainfo.dict
             for (key, val) in zip(keys(metainfo), values(metainfo))
                 print(io, ' ', key, "=\"", val, '"')
             end
         else
-            print(io, ' ', BioCore.metainfoval(metainfo))
+            print(io, ' ', metainfoval(metainfo))
         end
     else
         print(io, " <not filled>")
