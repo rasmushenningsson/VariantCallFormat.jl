@@ -4,7 +4,6 @@ using Test
 using VariantCallFormat
 
 # import BioCore: isfilled
-import BioCore.Exceptions.MissingFieldException
 import BufferedStreams: BufferedInputStream
 import YAML
 

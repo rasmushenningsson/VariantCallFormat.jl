@@ -4,7 +4,6 @@ import Automa
 import Automa.RegExp: @re_str
 import BioCore
 # import BioCore: isfilled, metainfotag, metainfoval, header
-import BioCore.Exceptions: missingerror
 import BufferedStreams
 
 export
@@ -17,6 +16,7 @@ export
     MissingFieldException
 
 include("AbstractIO/AbstractIO.jl")
+include("exceptions.jl")
 
 include("record.jl")
 include("metainfo.jl")
