@@ -33,7 +33,7 @@
     @test BCF.info(record, 1) == 42
     @test BCF.info(record, 1, simplify=false) == [42]
 
-    bcfdir = joinpath(fmtdir, "BCF")
+    bcfdir = joinpath(@__DIR__, "data/BCF")
     reader = BCF.Reader(open(joinpath(bcfdir, "example.bcf")))
     let header = header(reader)
         @test length(findall(header, "fileformat")) == 1
