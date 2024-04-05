@@ -3,7 +3,6 @@ module TestVariantCallFormat
 using Test
 using VariantCallFormat
 
-# import BioCore: isfilled
 import BufferedStreams: BufferedInputStream
 import YAML
 

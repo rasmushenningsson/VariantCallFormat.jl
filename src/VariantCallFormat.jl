@@ -3,7 +3,6 @@ module VariantCallFormat
 import Automa
 import Automa.RegExp: @re_str
 import BioCore
-# import BioCore: isfilled, metainfotag, metainfoval, header
 import BufferedStreams
 
 export
