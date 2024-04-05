@@ -1,6 +1,5 @@
 module BCF
 
-import BioCore
 import VariantCallFormat: VCF, AbstractIO, isfilled, header
 import BGZFStreams
 import BufferedStreams
