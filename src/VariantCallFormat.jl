@@ -2,9 +2,8 @@ module VariantCallFormat
 
 import Automa
 import Automa.RegExp: @re_str
-import BioCore
-import BioCore: isfilled, metainfotag, metainfoval, header
-import BioCore.Exceptions: missingerror
+import BioGenerics: BioGenerics, isfilled, metainfotag, metainfoval, header
+import BioGenerics.Exceptions: missingerror, MissingFieldException
 import BufferedStreams
 
 export
@@ -15,6 +14,8 @@ export
     metainfoval,
     isfilled,
     MissingFieldException
+
+include("ReaderHelper.jl")
 
 include("record.jl")
 include("metainfo.jl")

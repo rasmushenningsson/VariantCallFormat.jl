@@ -51,7 +51,7 @@ end
 
 function Base.show(io::IO, header::Header)
     println(io, summary(header), ':')
-    tags = BioCore.metainfotag.(header.metainfo)
+    tags = metainfotag.(header.metainfo)
     println(io, "  metainfo tags: ", join(unique(tags), ' '))
       print(io, "     sample IDs: ", join(header.sampleID, ' '))
 end

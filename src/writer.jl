@@ -1,4 +1,4 @@
-mutable struct Writer{T<:IO} <: BioCore.IO.AbstractWriter
+mutable struct Writer{T<:IO} <: BioGenerics.IO.AbstractWriter
     stream::T
 end
 
@@ -15,7 +15,7 @@ function Writer(output::IO, header::Header)
     return writer
 end
 
-function BioCore.IO.stream(writer::Writer)
+function BioGenerics.IO.stream(writer::Writer)
     return writer.stream
 end
 

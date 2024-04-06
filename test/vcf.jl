@@ -297,7 +297,7 @@
     @test_throws EOFError read!(reader, record)
 
     # round-trip test
-    vcfdir = joinpath(fmtdir, "VCF")
+    vcfdir = joinpath(@__DIR__, "data/VCF")
     for specimen in YAML.load_file(joinpath(vcfdir, "index.yml"))
         filepath = joinpath(vcfdir, specimen["filename"])
         records = VCF.Record[]
