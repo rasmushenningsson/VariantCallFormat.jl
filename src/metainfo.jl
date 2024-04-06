@@ -124,12 +124,12 @@ function isequaltag(metainfo::MetaInfo, tag::AbstractString)
            memcmp(pointer(metainfo.data, first(metainfo.tag)), pointer(tag), length(metainfo.tag)) == 0
 end
 
-function metainfotag(metainfo::MetaInfo)
+function BioGenerics.metainfotag(metainfo::MetaInfo)
     checkfilled(metainfo)
     return String(metainfo.data[metainfo.tag])
 end
 
-function metainfoval(metainfo::MetaInfo)
+function BioGenerics.metainfoval(metainfo::MetaInfo)
     checkfilled(metainfo)
     return String(metainfo.data[metainfo.val])
 end

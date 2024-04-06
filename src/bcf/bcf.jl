@@ -1,7 +1,7 @@
 module BCF
 
-import VariantCallFormat: VCF, isfilled, header
-import BioGenerics
+import BioGenerics: BioGenerics, isfilled, header
+import VariantCallFormat: VCF
 import BGZFStreams
 import BufferedStreams
 
