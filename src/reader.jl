@@ -1,9 +1,9 @@
 mutable struct Reader <: BioGenerics.IO.AbstractReader
-    state::Ragel.State
+    state::ReaderHelper.State
     header::Header
 
     function Reader(input::BufferedStreams.BufferedInputStream)
-        reader = new(Ragel.State(vcf_header_machine.start_state, input), Header())
+        reader = new(ReaderHelper.State(vcf_header_machine.start_state, input), Header())
         readheader!(reader)
         reader.state.cs = vcf_body_machine.start_state
         return reader

@@ -8,10 +8,21 @@
 
 module ReaderHelper
 
-import ..Ragel
-
 import Automa
 import BufferedStreams
+
+mutable struct State{T<:BufferedStreams.BufferedInputStream}
+    stream::T      # input stream
+    cs::Int        # current DFA state of Ragel
+    linenum::Int   # line number: parser is responsible for updating this
+    finished::Bool # true if finished (regardless of where in the stream we are)
+end
+
+function State(initstate::Int, input::BufferedStreams.BufferedInputStream)
+    return State(input, initstate, 1, false)
+end
+
+
 
 @inline function anchor!(stream::BufferedStreams.BufferedInputStream, p, immobilize = true)
     stream.anchor = p
@@ -82,7 +93,7 @@ function generate_readheader_function(reader_type, metainfo_type, machine, init_
             _readheader!(reader, reader.state)
         end
 
-        function _readheader!(reader::$(reader_type), state::Ragel.State)
+        function _readheader!(reader::$(reader_type), state::ReaderHelper.State)
             stream = state.stream
             ReaderHelper.ensure_margin!(stream)
             cs = state.cs
@@ -136,7 +147,7 @@ function generate_read_function(reader_type, machine, init_code, actions; kwargs
             return _read!(reader, reader.state, record)
         end
 
-        function _read!(reader::$(reader_type), state::Ragel.State, record::eltype($(reader_type)))
+        function _read!(reader::$(reader_type), state::ReaderHelper.State, record::eltype($(reader_type)))
             stream = state.stream
             ReaderHelper.ensure_margin!(stream)
             cs = state.cs

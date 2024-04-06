@@ -2,7 +2,6 @@ module VariantCallFormat
 
 import Automa
 import Automa.RegExp: @re_str
-# import BioCore
 import BioGenerics
 import BioGenerics.Exceptions: missingerror, MissingFieldException
 import BufferedStreams
@@ -16,7 +15,6 @@ export
     isfilled,
     MissingFieldException
 
-include("Ragel.jl")
 include("ReaderHelper.jl")
 
 include("record.jl")
