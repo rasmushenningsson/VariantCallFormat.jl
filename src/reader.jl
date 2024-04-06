@@ -1,4 +1,4 @@
-mutable struct Reader <: AbstractIO.AbstractReader
+mutable struct Reader <: BioGenerics.IO.AbstractReader
     state::BioCore.Ragel.State
     header::Header
 
@@ -24,7 +24,7 @@ function Base.eltype(::Type{Reader})
     return Record
 end
 
-function AbstractIO.stream(reader::Reader)
+function BioGenerics.IO.stream(reader::Reader)
     return reader.state.stream
 end
 

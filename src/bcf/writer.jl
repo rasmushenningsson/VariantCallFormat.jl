@@ -1,4 +1,4 @@
-struct Writer{T<:IO} <: AbstractIO.AbstractWriter
+struct Writer{T<:IO} <: BioGenerics.IO.AbstractWriter
     stream::BGZFStreams.BGZFStream{T}
 end
 
@@ -24,7 +24,7 @@ function Writer(output::IO, header::VCF.Header)
     return Writer(stream)
 end
 
-function AbstractIO.stream(writer::Writer)
+function BioGenerics.IO.stream(writer::Writer)
     return writer.stream
 end
 

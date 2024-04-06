@@ -1,4 +1,4 @@
-struct Reader{T<:IO} <: AbstractIO.AbstractReader
+struct Reader{T<:IO} <: BioGenerics.IO.AbstractReader
     version::Tuple{UInt8,UInt8}  # (major, minor)
     header::VCF.Header
     stream::BGZFStreams.BGZFStream{T}
@@ -40,7 +40,7 @@ function Base.eltype(::Type{Reader{T}}) where T
     return Record
 end
 
-function AbstractIO.stream(reader::Reader)
+function BioGenerics.IO.stream(reader::Reader)
     return reader.stream
 end
 

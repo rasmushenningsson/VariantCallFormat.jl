@@ -3,6 +3,7 @@ module VariantCallFormat
 import Automa
 import Automa.RegExp: @re_str
 import BioCore
+import BioGenerics
 import BufferedStreams
 
 export
@@ -14,7 +15,6 @@ export
     isfilled,
     MissingFieldException
 
-include("AbstractIO/AbstractIO.jl")
 include("exceptions.jl")
 
 include("record.jl")
