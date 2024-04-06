@@ -4,5 +4,5 @@
 ```
 
 ```@autodocs
-Modules = [VariantCallFormat]
+Modules = [VariantCallFormat, BCF]
 ```
