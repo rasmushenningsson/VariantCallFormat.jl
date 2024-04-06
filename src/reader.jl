@@ -1,9 +1,9 @@
 mutable struct Reader <: BioGenerics.IO.AbstractReader
-    state::BioCore.Ragel.State
+    state::Ragel.State
     header::Header
 
     function Reader(input::BufferedStreams.BufferedInputStream)
-        reader = new(BioCore.Ragel.State(vcf_header_machine.start_state, input), Header())
+        reader = new(Ragel.State(vcf_header_machine.start_state, input), Header())
         readheader!(reader)
         reader.state.cs = vcf_body_machine.start_state
         return reader
@@ -212,37 +212,37 @@ const vcf_metainfo_actions = Dict(
     :metainfo_dict_key => :(push!(record.dictkey, (mark1:p-1) .- offset)),
     :metainfo_dict_val => :(push!(record.dictval, (mark1:p-1) .- offset)),
     :metainfo          => quote
-        BioCore.ReaderHelper.resize_and_copy!(record.data, data, offset+1:p-1)
+        ReaderHelper.resize_and_copy!(record.data, data, offset+1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor            => :(),
     :mark1             => :(mark1 = p),
     :mark2             => :(mark2 = p))
 eval(
-    BioCore.ReaderHelper.generate_index_function(
+    ReaderHelper.generate_index_function(
         MetaInfo,
         vcf_metainfo_machine,
         :(mark1 = mark2 = offset = 0),
         vcf_metainfo_actions))
 eval(
-    BioCore.ReaderHelper.generate_readheader_function(
+    ReaderHelper.generate_readheader_function(
         Reader,
         MetaInfo,
         vcf_header_machine,
         :(mark1 = mark2 = offset = 0),
         merge(vcf_metainfo_actions, Dict(
             :metainfo => quote
-                BioCore.ReaderHelper.resize_and_copy!(record.data, data, BioCore.ReaderHelper.upanchor!(stream):p-1)
+                ReaderHelper.resize_and_copy!(record.data, data, ReaderHelper.upanchor!(stream):p-1)
                 record.filled = (offset+1:p-1) .- offset
                 @assert isfilled(record)
                 push!(reader.header.metainfo, record)
-                BioCore.ReaderHelper.ensure_margin!(stream)
+                ReaderHelper.ensure_margin!(stream)
                 record = MetaInfo()
             end,
             :header_sampleID => :(push!(reader.header.sampleID, String(data[mark1:p-1]))),
             :vcfheader => :(finish_header = true; @escape),
             :countline => :(linenum += 1),
-            :anchor    => :(BioCore.ReaderHelper.anchor!(stream, p); offset = p - 1)))))
+            :anchor    => :(ReaderHelper.anchor!(stream, p); offset = p - 1)))))
 
 const vcf_record_actions = Dict(
     :record_chrom        => :(record.chrom = (mark:p-1) .- offset),
@@ -257,28 +257,28 @@ const vcf_record_actions = Dict(
     :record_genotype     => :(push!(record.genotype, UnitRange{Int}[])),
     :record_genotype_elm => :(push!(record.genotype[end], (mark:p-1) .- offset)),
     :record              => quote
-        BioCore.ReaderHelper.resize_and_copy!(record.data, data, 1:p-1)
+        ReaderHelper.resize_and_copy!(record.data, data, 1:p-1)
         record.filled = (offset+1:p-1) .- offset
     end,
     :anchor              => :(),
     :mark                => :(mark = p))
 eval(
-    BioCore.ReaderHelper.generate_index_function(
+    ReaderHelper.generate_index_function(
         Record,
         vcf_record_machine,
         :(mark = offset = 0),
         vcf_record_actions))
 eval(
-    BioCore.ReaderHelper.generate_read_function(
+    ReaderHelper.generate_read_function(
         Reader,
         vcf_body_machine,
         :(mark = offset = 0),
         merge(vcf_record_actions, Dict(
             :record    => quote
-                BioCore.ReaderHelper.resize_and_copy!(record.data, data, BioCore.ReaderHelper.upanchor!(stream):p-1)
+                ReaderHelper.resize_and_copy!(record.data, data, ReaderHelper.upanchor!(stream):p-1)
                 record.filled = (offset+1:p-1) .- offset
                 found_record = true
                 @escape
             end,
             :countline => :(linenum += 1),
-            :anchor    => :(BioCore.ReaderHelper.anchor!(stream, p); offset = p - 1)))))
+            :anchor    => :(ReaderHelper.anchor!(stream, p); offset = p - 1)))))
