@@ -14,6 +14,7 @@ BufferedStreams = "e1450e63-4bb3-523b-b2a4-4ffa8c0fd77d"
 Automa = "0.7, =0.8.0, 0.8.2"
 BGZFStreams = "0.3"
 BioCore = "2.0.5"
+BioGenerics = "1"
 BufferedStreams = "1"
 julia = "1"
 
