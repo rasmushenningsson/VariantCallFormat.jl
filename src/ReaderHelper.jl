@@ -64,11 +64,7 @@ end
 
 function generate_index_function(record_type, machine, init_code, actions; kwargs...)
     kwargs = Dict(kwargs)
-    context = Automa.CodeGenContext(
-        generator = get(kwargs, :generator, :goto),
-        checkbounds = get(kwargs, :checkbounds, false),
-        loopunroll = get(kwargs, :loopunroll, 0)
-    )
+    context = Automa.CodeGenContext(generator=:goto)
     quote
         function index!(record::$(record_type))
             data = record.data
@@ -76,7 +72,7 @@ function generate_index_function(record_type, machine, init_code, actions; kwarg
             p_end = p_eof = sizeof(data)
             initialize!(record)
             $(init_code)
-            cs = $(machine.start_state)
+            cs = 1
             $(Automa.generate_exec_code(context, machine, actions))
             if cs != 0
                 throw(ArgumentError(string("failed to index ", $(record_type), " ~>", repr(String(data[p:min(p+7,p_end)])))))
@@ -137,11 +133,7 @@ end
 
 function generate_read_function(reader_type, machine, init_code, actions; kwargs...)
     kwargs = Dict(kwargs)
-    context = Automa.CodeGenContext(
-        generator=get(kwargs, :generator, :goto),
-        checkbounds=get(kwargs, :checkbounds, false),
-        loopunroll=get(kwargs, :loopunroll, 0)
-    )
+    context = Automa.CodeGenContext(generator=:goto)
     quote
         function Base.read!(reader::$(reader_type), record::eltype($(reader_type)))::eltype($(reader_type))
             return _read!(reader, reader.state, record)
