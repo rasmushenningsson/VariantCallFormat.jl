@@ -51,7 +51,7 @@ const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_mac
     # All kinds of meta-information line after 'fileformat' are handled here.
     metainfo = let
         tag = onexit!(onenter!(re"[0-9A-Za-z_\.\-\+]+", :mark1), :metainfo_tag)
-        str = onexit!(onenter!(re"[ -;=-~][ -~]*", :mark2), :metainfo_tag)  # does not starts with '<'
+        str = onexit!(onenter!(re"[ -;=-~][ -~]*", :mark2), :metainfo_val)  # does not starts with '<'
 
         dict = let
             dictkey = onexit!(onenter!(re"[0-9A-Za-z_\-\+]+", :mark1), :metainfo_dict_key)
@@ -83,11 +83,12 @@ const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_mac
             onenter!(delim(elm, ';') | '.', :mark)
         end
 
-        ref = onexit!(re"[!-~]+", :record_ref)
+        ref = onexit!(onenter!(re"[!-~]+", :mark), :record_ref)
 
         alt′ = let
-            elm = onexit!(re"[!-+--~]+" \ '.', :record_alt)
-            onenter!(delim(elm, ',') | '.', :mark)
+            elm = onexit!(onenter!(re"[!-+--~]+" \ '.', :mark), :record_alt)
+            dot = onenter!(re"\.", :mark)
+            delim(elm, ',') | dot
         end
 
         qual = onexit!(onenter!(re"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?|NaN|[-+]Inf|\.", :mark), :record_qual)
@@ -98,14 +99,14 @@ const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_mac
         end
 
         info = let
-            key = onexit!(re"[A-Za-z_][0-9A-Za-z_.]*", :record_info_key)
+            key = onexit!(onenter!(re"[A-Za-z_][0-9A-Za-z_.]*", :mark), :record_info_key)
             val = opt(re"=[ -:<-~]+")
-            onenter!(delim(key * val, ';') | '.', :mark)
+            delim(key * val, ';') | '.'
         end
 
         format = let
-            elm = onexit!(re"[A-Za-z_][0-9A-Za-z_.]*", :record_format)
-            onenter!(delim(elm, ':') | '.', :mark)
+            elm = onexit!(onenter!(re"[A-Za-z_][0-9A-Za-z_.]*", :mark), :record_format)
+            delim(elm, ':') | '.'
         end
 
         genotype = let

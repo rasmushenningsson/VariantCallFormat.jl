@@ -70,6 +70,7 @@ function generate_index_function(record_type, machine, init_code, actions; kwarg
             data = record.data
             p = 1
             p_end = p_eof = sizeof(data)
+            is_eof = true
             initialize!(record)
             $(init_code)
             cs = 1
@@ -98,6 +99,7 @@ function generate_readheader_function(reader_type, metainfo_type, machine, init_
             p = stream.position
             p_end = stream.available
             p_eof = -1
+            is_eof = false
             finish_header = false
             record = $(metainfo_type)()
 
@@ -124,6 +126,7 @@ function generate_readheader_function(reader_type, metainfo_type, machine, init_
                     p_end = stream.available
                     if hits_eof
                         p_eof = p_end
+                        is_eof = true
                     end
                 end
             end
@@ -148,6 +151,7 @@ function generate_read_function(reader_type, machine, init_code, actions; kwargs
             p = stream.position
             p_end = stream.available
             p_eof = -1
+            is_eof = false
             found_record = false
             initialize!(record)
 
@@ -179,6 +183,7 @@ function generate_read_function(reader_type, machine, init_code, actions; kwargs
                     p_end = stream.available
                     if hits_eof
                         p_eof = p_end
+                        is_eof = true
                     end
                 end
             end
