@@ -6,7 +6,6 @@ CurrentModule = VariantCallFormat
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](https://github.com/rasmushenningsson/VariantCallFormat.jl/blob/main/LICENSE)
 [![Build Status](https://github.com/rasmushenningsson/VariantCallFormat.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VariantCallFormat.jl/actions)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VariantCallFormat.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VCF-jl)
 [![Coverage](https://codecov.io/gh/rasmushenningsson/VariantCallFormat.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VariantCallFormat.jl)
 
 VariantCallFormat.jl is based on previous work in [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).

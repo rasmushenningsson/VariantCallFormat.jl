@@ -5,7 +5,6 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://rasmushenningsson.github.io/VariantCallFormat.jl/dev)
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/rasmushenningsson/VariantCallFormat.jl/blob/main/LICENSE)
 [![Build Status](https://github.com/rasmushenningsson/VariantCallFormat.jl/workflows/CI/badge.svg)](https://github.com/rasmushenningsson/VariantCallFormat.jl/actions)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/rasmushenningsson/VariantCallFormat.jl?svg=true)](https://ci.appveyor.com/project/rasmushenningsson/VariantCallFormat-jl)
 [![Coverage](https://codecov.io/gh/rasmushenningsson/VariantCallFormat.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/rasmushenningsson/VariantCallFormat.jl)
 
 
@@ -31,4 +30,3 @@ Pkg.add("VariantCallFormat")
 
 ## Further Reading
 [VCF and BCF file format descriptions.](https://samtools.github.io/hts-specs/)
-
