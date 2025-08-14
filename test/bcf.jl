@@ -1,3 +1,7 @@
+function parsehex(str)
+    return map(x -> parse(UInt8, x, base = 16), split(str, ' '))
+end
+
 @testset "BCF" begin
     record = BCF.Record()
     @test !isfilled(record)
@@ -62,25 +66,31 @@
     close(reader)
 
     # round-trip test
-    for specimen in YAML.load_file(joinpath(bcfdir, "index.yml"))
-        filepath = joinpath(bcfdir, specimen["filename"])
-        records = BCF.Record[]
-        reader = open(BCF.Reader, filepath)
-        output = IOBuffer()
-        writer = BCF.Writer(output, header(reader))
-        for record in reader
-            write(writer, record)
-            push!(records, record)
-        end
-        # HACK: take the data buffer before closing the writer
-        data = output.data
-        close(reader)
-        close(writer)
+    mktempdir() do temp_path
+        for specimen in YAML.load_file(joinpath(bcfdir, "index.yml"))
+            filepath = joinpath(bcfdir, specimen["filename"])
+            temp_filepath = joinpath(temp_path, specimen["filename"])
+            records = BCF.Record[]
 
-        records2 = BCF.Record[]
-        for record in BCF.Reader(IOBuffer(data))
-            push!(records2, record)
+            open(temp_filepath, "w") do output
+                open(BCF.Reader, filepath) do reader
+                    writer = BCF.Writer(output, header(reader))
+                    for record in reader
+                        write(writer, record)
+                        push!(records, record)
+                    end
+                    close(writer)
+                end
+            end
+
+            records2 = BCF.Record[]
+            open(BCF.Reader, temp_filepath) do reader
+                for record in reader
+                    push!(records2, record)
+                end
+            end
+
+            @test records == records2
         end
-        @test records == records2
     end
 end

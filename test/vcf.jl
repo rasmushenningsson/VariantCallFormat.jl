@@ -336,7 +336,3 @@
     @test VCF.hasinfo(record, "DB")
     @test VCF.info(record, "DB") == ""
 end
-
-function parsehex(str)
-    return map(x -> parse(UInt8, x, base = 16), split(str, ' '))
-end
