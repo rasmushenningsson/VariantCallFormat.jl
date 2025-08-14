@@ -3,9 +3,9 @@ mutable struct Reader <: BioGenerics.IO.AbstractReader
     header::Header
 
     function Reader(input::BufferedStreams.BufferedInputStream)
-        reader = new(ReaderHelper.State(vcf_header_machine.start_state, input), Header())
+        reader = new(ReaderHelper.State(1, input), Header())
         readheader!(reader)
-        reader.state.cs = vcf_body_machine.start_state
+        reader.state.cs = 1
         return reader
     end
 end
@@ -38,173 +38,109 @@ end
 
 # VCF v4.3
 @info "Compiling VCF parser..."
-const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_machine = (function ()
-    cat = Automa.RegExp.cat
-    rep = Automa.RegExp.rep
-    alt = Automa.RegExp.alt
-    opt = Automa.RegExp.opt
-    delim(x, sep) = opt(cat(x, rep(cat(sep, x))))
+const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_machine = let
+    delim(x, sep) = opt(x * rep(sep * x))
 
     # The 'fileformat' field is required and must be the first line.
     fileformat = let
-        key = cat("fileformat")
-        key.actions[:enter] = [:mark1]
-        key.actions[:exit]  = [:metainfo_tag]
-
-        version = re"[!-~]+"
-        version.actions[:enter] = [:mark2]
-        version.actions[:exit]  = [:metainfo_val]
-
-        cat("##", key, '=', version)
+        key = onexit!(onenter!(re"fileformat", :mark1), :metainfo_tag)
+        version = onexit!(onenter!(re"[!-~]+", :mark2), :metainfo_val)
+        onexit!(onenter!("##" * key * '=' * version, :anchor), :metainfo)
     end
-    fileformat.actions[:enter] = [:anchor]
-    fileformat.actions[:exit]  = [:metainfo]
 
     # All kinds of meta-information line after 'fileformat' are handled here.
     metainfo = let
-        tag = re"[0-9A-Za-z_\.\-\+]+"
-        tag.actions[:enter] = [:mark1]
-        tag.actions[:exit]  = [:metainfo_tag]
-
-        str = re"[ -;=-~][ -~]*"  # does not starts with '<'
-        str.actions[:enter] = [:mark2]
-        str.actions[:exit]  = [:metainfo_val]
+        tag = onexit!(onenter!(re"[0-9A-Za-z_\.\-\+]+", :mark1), :metainfo_tag)
+        str = onexit!(onenter!(re"[ -;=-~][ -~]*", :mark2), :metainfo_tag)  # does not starts with '<'
 
         dict = let
-            dictkey = re"[0-9A-Za-z_\-\+]+"
-            dictkey.actions[:enter] = [:mark1]
-            dictkey.actions[:exit]  = [:metainfo_dict_key]
+            dictkey = onexit!(onenter!(re"[0-9A-Za-z_\-\+]+", :mark1), :metainfo_dict_key)
 
             dictval = let
-                quoted   = cat('"', rep(alt(re"[ !#-[\]-~]", "\\\"", "\\\\")), '"')
+                quoted   = '"' * rep(re"[ !#-[\]-~]" | "\\\\\"" | "\\\\\\") * '"'
                 unquoted = rep(re"[ -~]" \ re"[\",>]")
-                alt(quoted, unquoted)
+                onexit!(onenter!(quoted | unquoted, :mark1), :metainfo_dict_val)
             end
-            dictval.actions[:enter] = [:mark1]
-            dictval.actions[:exit]  = [:metainfo_dict_val]
-
-            cat('<', delim(cat(dictkey, '=', dictval), ','), '>')
+            onexit!(onenter!('<' * delim(dictkey * '=' * dictval, ',') * '>', :mark2), :metainfo_val)
         end
-        dict.actions[:enter] = [:mark2]
-        dict.actions[:exit]  = [:metainfo_val]
-
-        cat("##", tag, '=', alt(str, dict))
+        onexit!(onenter!("##" * tag * '=' * (str | dict), :anchor), :metainfo)
     end
-    metainfo.actions[:enter] = [:anchor]
-    metainfo.actions[:exit]  = [:metainfo]
 
     # The header line.
     header = let
-        sampleID = re"[ -~]+"
-        sampleID.actions[:enter] = [:mark1]
-        sampleID.actions[:exit]  = [:header_sampleID]
-
-        cat("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO", opt(re"\tFORMAT" * rep(re"\t" * sampleID)))
+        sampleID = onexit!(onenter!(re"[ -~]+", :mark1), :header_sampleID)
+        onenter!("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO" * opt(re"\tFORMAT" * rep(re"\t" * sampleID)), :anchor)
     end
-    header.actions[:enter] = [:anchor]
 
     # Data lines (fixed fields and variable genotype fields).
     record = let
-        chrom = re"[!-9;-~]+"  # no colon
-        chrom.actions[:enter] = [:mark]
-        chrom.actions[:exit]  = [:record_chrom]
-
-        pos = re"[0-9]+|\."
-        pos.actions[:enter] = [:mark]
-        pos.actions[:exit]  = [:record_pos]
+        chrom = onexit!(onenter!(re"[!-9;-~]+", :mark), :record_chrom)  # no colon
+        pos = onexit!(onenter!(re"[0-9]+|\.", :mark), :record_pos)
 
         id = let
-            elm = re"[!-:<-~]+" \ cat('.')
-            elm.actions[:enter] = [:mark]
-            elm.actions[:exit]  = [:record_id]
+            elm = onexit!(re"[!-:<-~]+" \ '.', :record_id)
 
-            alt(delim(elm, ';'), '.')
+            onenter!(delim(elm, ';') | '.', :mark)
         end
 
-        ref = re"[!-~]+"
-        ref.actions[:enter] = [:mark]
-        ref.actions[:exit]  = [:record_ref]
+        ref = onexit!(re"[!-~]+", :record_ref)
 
         alt′ = let
-            elm = re"[!-+--~]+" \ cat('.')
-            elm.actions[:enter] = [:mark]
-            elm.actions[:exit]  = [:record_alt]
-
-            alt(delim(elm, ','), '.')
+            elm = onexit!(re"[!-+--~]+" \ '.', :record_alt)
+            onenter!(delim(elm, ',') | '.', :mark)
         end
 
-        qual = re"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?|NaN|[-+]Inf|\."
-        qual.actions[:enter] = [:mark]
-        qual.actions[:exit]  = [:record_qual]
+        qual = onexit!(onenter!(re"[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?|NaN|[-+]Inf|\.", :mark), :record_qual)
 
         filter = let
-            elm = re"[!-:<-~]+" \ cat('.')
-            elm.actions[:enter] = [:mark]
-            elm.actions[:exit]  = [:record_filter]
-
-            alt(delim(elm, ';'), '.')
+            elm = onexit!(re"[!-:<-~]+" \ '.', :record_filter)
+            onenter!(delim(elm, ';') | '.', :mark)
         end
 
         info = let
-            key = re"[A-Za-z_][0-9A-Za-z_.]*"
-            key.actions[:enter] = [:mark]
-            key.actions[:exit]  = [:record_info_key]
-
-            val = opt(cat('=', re"[ -:<-~]+"))
-
-            alt(delim(cat(key, val), ';'), '.')
+            key = onexit!(re"[A-Za-z_][0-9A-Za-z_.]*", :record_info_key)
+            val = opt(re"=[ -:<-~]+")
+            onenter!(delim(key * val, ';') | '.', :mark)
         end
 
         format = let
-            elm = re"[A-Za-z_][0-9A-Za-z_.]*"
-            elm.actions[:enter] = [:mark]
-            elm.actions[:exit]  = [:record_format]
-
-            alt(delim(elm, ':'), '.')
+            elm = onexit!(re"[A-Za-z_][0-9A-Za-z_.]*", :record_format)
+            onenter!(delim(elm, ':') | '.', :mark)
         end
 
         genotype = let
-            elm = re"[ -9;-~]+"  # no colon
-            elm.actions[:enter] = [:mark]
-            elm.actions[:exit]  = [:record_genotype_elm]
-
-            delim(elm, ':')
+            elm = onexit!(onenter!(re"[ -9;-~]+", :mark), :record_genotype_elm)  # no colon
+            onenter!(delim(elm, ':'), :record_genotype)
         end
-        genotype.actions[:enter] = [:record_genotype]
 
-        cat(
-            chrom,  '\t',
-            pos,    '\t',
-            id,     '\t',
-            ref,    '\t',
-            alt′,   '\t',
-            qual,   '\t',
-            filter, '\t',
-            info,
-            opt(cat('\t', format, rep(cat('\t', genotype)))))
+            chrom *  '\t' *
+            pos *    '\t' *
+            id *     '\t' *
+            ref *    '\t' *
+            alt′ *   '\t' *
+            qual *   '\t' *
+            filter * '\t' *
+            info *
+            opt('\t' * format * rep('\t' * genotype))
     end
-    record.actions[:enter] = [:anchor]
-    record.actions[:exit]  = [:record]
+    onexit!(onenter!(record, :anchor), :record)
 
     # A newline can be either a CR+LF or a LF.
     newline = let
-        lf = re"\n"
-        lf.actions[:enter] = [:countline]
-
-        cat(opt('\r'), lf)
+        lf = onenter!(re"\n", :countline)
+        opt(re"\r") * lf
     end
 
     # The VCF file format (header and body part).
-    vcfheader = cat(
-        fileformat, newline,
-        rep(cat(metainfo, newline)),
-        header, newline)
-    vcfheader.actions[:final] = [:vcfheader]
+    vcfheader = fileformat * newline *
+        rep(metainfo * newline) *
+        header * newline
+    onfinal!(vcfheader, :vcfheader)
 
-    vcfbody = rep(cat(record, newline))
+    vcfbody = rep(record * newline)
 
-    return map(Automa.compile, (metainfo, record, vcfheader, vcfbody))
-end)()
+    map(compile, (metainfo, record, vcfheader, vcfbody))
+end
 
 const vcf_metainfo_actions = Dict(
     :metainfo_tag      => :(record.tag = (mark1:p-1) .- offset),
