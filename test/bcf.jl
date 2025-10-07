@@ -31,7 +31,7 @@ end
     @test BCF.alt(record) == ["ATT", "ACT"]
     record = BCF.Record(record, filter = [2, 3])
     @test BCF.filter(record) == [2, 3]
-    record = BCF.Record(record, info=Dict(1 => Int8[42]))
+    record = BCF.Record(record, info=OrderedDict(1 => Int8[42]))
     @test BCF.info(record) == [(1, 42)]
     @test BCF.info(record, simplify=false) == [(1, [42])]
     @test BCF.info(record, 1) == 42
