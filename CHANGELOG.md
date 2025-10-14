@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.8] - 2025-10-14
+
+### Fixed
+- Fixed test failure on Julia 1.13 due to Dict order change. (Only affected unit tests.)
+
+## [0.5.7] - 2025-08-19
+
+### Changed
+- Update to Automa.jl v1.
+
 ## [0.5.0] - 2020-02-18
 Created VariantCallFormat.jl package, based on [GeneticVariation.jl](https://github.com/BioJulia/GeneticVariation.jl).
 
