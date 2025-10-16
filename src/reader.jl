@@ -74,7 +74,7 @@ const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_mac
 
     # Data lines (fixed fields and variable genotype fields).
     record = let
-        chrom = onexit!(onenter!(re"[!-9;-~]+", :mark), :record_chrom)  # no colon
+        chrom = onexit!(onenter!(re"[!-9:;-~]+", :mark), :record_chrom)
         pos = onexit!(onenter!(re"[0-9]+|\.", :mark), :record_pos)
 
         id = let
