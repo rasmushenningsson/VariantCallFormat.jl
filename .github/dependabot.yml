@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "julia"
-    directory: "/"
+    directory: "/" # the workspace in Project.toml includes test/ and docs/
     schedule:
       interval: "daily"
     groups:
