@@ -410,7 +410,7 @@ function genotype(record::Record, index::Integer, key::Integer)
     checkfilled(record)
     N = n_sample(record)
     offset::Int = record.sharedlen
-    for j in 1:n_format(record)
+    for _ in 1:n_format(record)
         k, offset = loadvec(record.data, offset)
         @assert length(k) == 1
         head, offset = loadvechead(record.data, offset)
@@ -429,19 +429,19 @@ function genotype(record::Record, indexes::AbstractVector{<:Integer}, key::Integ
     checkfilled(record)
     N = n_sample(record)
     offset::Int = record.sharedlen
-    for j in 1:n_format(record)
+    for _j in 1:n_format(record)
         k, offset = loadvec(record.data, offset)
         @assert length(k) == 1
         head, offset = loadvechead(record.data, offset)
         if k[1] == key
             vals = Vector{Any}[]
-            for n in 1:N
+            for _ in 1:N
                 val, offset = loadvecbody(record.data, offset, head)
                 push!(vals, val)
             end
             return vals[indexes]
         else
-            for n in 1:N
+            for _ in 1:N
                 offset = skipvecbody(record.data, offset, head)
             end
         end
@@ -451,6 +451,201 @@ end
 
 function genotype(record::Record, ::Colon, key::Integer)
     return genotype(record, 1:n_sample(record), key)
+end
+
+# VCF-style accessors (need the header to resolve the BCF dictionary of strings)
+# ------------------------------------------------------------------------------
+# These decode straight from the record bytes and are type-stable, unlike the raw
+# accessors above.
+
+# ponytail: cached per header object and never evicted; a header mutated after
+# first use gives stale indexes. Store the dictionary in the Reader if that bites.
+const STRDICTS = IdDict{VCF.Header,Tuple{Dict{Int,String},Dict{String,Int}}}()
+const STRDICTS_LOCK = ReentrantLock()
+
+"""
+BCF dictionary of strings (index => ID of the FILTER/INFO/FORMAT header lines) and its inverse.
+"""
+function strdict(header::VCF.Header)
+    lock(STRDICTS_LOCK) do
+        get!(STRDICTS, header) do
+            d = Dict{Int,String}(0 => "PASS")
+            for m in header
+                metainfotag(m) in ("FILTER", "INFO", "FORMAT") || continue
+                id = m["ID"]
+                id in values(d) && continue  # same ID in INFO and FORMAT shares one index
+                d["IDX" in keys(m) ? parse(Int, m["IDX"]) : length(d)] = id
+            end
+            d, Dict(v => k for (k, v) in d)
+        end
+    end
+end
+
+typesize(t::UInt8) = t == 0x01 || t == 0x07 ? 1 : t == 0x02 ? 2 : t == 0x03 || t == 0x05 ? 4 : 0
+
+"""
+Load a typed vector head: (type code, length, offset of the body)
+"""
+function loadhead(data::Vector{UInt8}, offset::Int)
+    b = data[offset+1]
+    t = b & 0x0f
+    len = Int(b >> 4)
+    len < 15 && return t, len, offset + 1
+    len, offset = loadint(data, offset + 1)
+    return t, len, offset
+end
+
+"""
+Load a typed scalar integer.
+"""
+function loadint(data::Vector{UInt8}, offset::Int)
+    t = data[offset+1] & 0x0f
+    offset += 1
+    t == 0x01 && return Int(load(Int8, data, offset)[1]), offset + 1
+    t == 0x02 && return Int(load(Int16, data, offset)[1]), offset + 2
+    return Int(load(Int32, data, offset)[1]), offset + 4
+end
+
+"""
+Find FORMAT field `k`: (type code, values per sample, offset of the first sample), offset < 0 if absent.
+"""
+function findformat(record::Record, k::Int)
+    data = record.data
+    offset = Int(record.sharedlen)
+    N = n_sample(record)
+    for _ in 1:n_format(record)
+        key, offset = loadint(data, offset)
+        t, len, offset = loadhead(data, offset)
+        key == k && return t, len, offset
+        offset += N * len * typesize(t)
+    end
+    return 0x00, 0, -1
+end
+
+"""
+    format(record::Record, header::VCF.Header)::Vector{String}
+Get the genotype format of `record`, like `VCF.format`.
+"""
+function format(record::Record, header::VCF.Header)::Vector{String}
+    checkfilled(record)
+    names = strdict(header)[1]
+    data = record.data
+    offset = Int(record.sharedlen)
+    N = n_sample(record)
+    ret = String[]
+    for _ in 1:n_format(record)
+        key, offset = loadint(data, offset)
+        t, len, offset = loadhead(data, offset)
+        offset += N * len * typesize(t)
+        push!(ret, names[key])
+    end
+    return ret
+end
+
+function writeint(buf::IOBuffer, x::Int)
+    if x < 0
+        write(buf, UInt8('-'))
+        x = -x
+    end
+    d = 1
+    while d * 10 <= x
+        d *= 10
+    end
+    while d > 0
+        write(buf, UInt8('0') + (x ÷ d % 10) % UInt8)
+        d ÷= 10
+    end
+end
+
+"""
+Write one sample's integer values the way they are written in a VCF file.
+"""
+function writeints(buf::IOBuffer, ::Type{T}, data::Vector{UInt8}, offset::Int, len::Int, isgt::Bool) where T
+    for i in 1:len
+        x, offset = load(T, data, offset)
+        x == typemin(T) + 1 && break  # end of vector
+        if isgt
+            i > 1 && write(buf, isodd(x) ? UInt8('|') : UInt8('/'))
+            allele = (Int(x) >> 1) - 1
+            allele < 0 ? write(buf, UInt8('.')) : writeint(buf, allele)
+        else
+            i > 1 && write(buf, UInt8(','))
+            x == typemin(T) ? write(buf, UInt8('.')) : writeint(buf, Int(x))
+        end
+    end
+end
+
+const FLOATFORMAT = Printf.Format("%g")  # what bcftools uses
+
+function writefloats(buf::IOBuffer, data::Vector{UInt8}, offset::Int, len::Int)
+    for i in 1:len
+        bits, offset = load(UInt32, data, offset)
+        bits == 0x7f800002 && break  # end of vector
+        i > 1 && write(buf, UInt8(','))
+        bits == 0x7f800001 ? write(buf, UInt8('.')) : Printf.format(buf, FLOATFORMAT, reinterpret(Float32, bits))
+    end
+end
+
+function writechars(buf::IOBuffer, data::Vector{UInt8}, offset::Int, len::Int)
+    for i in offset+1:offset+len
+        data[i] == 0x00 && break  # padding
+        write(buf, data[i])
+    end
+end
+
+sampleindexes(record::Record, ::Colon) = 1:n_sample(record)
+sampleindexes(::Record, indexes) = indexes
+
+"""
+    genotype(record::Record, header::VCF.Header, [indexes, [keys]])
+Get the genotypes of `record` as strings, by sample, exactly like `VCF.genotype`
+(e.g. `"0|1"` for `GT`). `indexes` is a sample index, a vector of them or `:`;
+`keys` is a FORMAT key such as `"GT"` or a vector of them.
+"""
+function genotype(record::Record, header::VCF.Header, indexes::Union{Colon,AbstractVector{<:Integer}}, key::String)::Vector{String}
+    checkfilled(record)
+    t, len, base = findformat(record, get(strdict(header)[2], key, -1))
+    base < 0 && throw(KeyError(key))
+    data = record.data
+    isgt = key == "GT"
+    buf = IOBuffer()
+    idx = sampleindexes(record, indexes)
+    checkbounds(1:n_sample(record), idx)
+    ret = Vector{String}(undef, length(idx))
+    for (j, i) in enumerate(idx)
+        offset = base + (i - 1) * len * typesize(t)
+        if t == 0x01
+            writeints(buf, Int8, data, offset, len, isgt)
+        elseif t == 0x02
+            writeints(buf, Int16, data, offset, len, isgt)
+        elseif t == 0x03
+            writeints(buf, Int32, data, offset, len, isgt)
+        elseif t == 0x05
+            writefloats(buf, data, offset, len)
+        elseif t == 0x07
+            writechars(buf, data, offset, len)
+        end
+        buf.size == 0 && write(buf, UInt8('.'))
+        ret[j] = String(take!(buf))
+    end
+    return ret
+end
+
+function genotype(record::Record, header::VCF.Header, indexes::Union{Colon,AbstractVector{<:Integer}}, keys::AbstractVector{String})::Vector{Vector{String}}
+    cols = [genotype(record, header, indexes, key) for key in keys]
+    return [[col[i] for col in cols] for i in 1:length(sampleindexes(record, indexes))]
+end
+
+function genotype(record::Record, header::VCF.Header, index::Integer, keys::Union{String,AbstractVector{String}})
+    return genotype(record, header, index:index, keys)[1]
+end
+
+function genotype(record::Record, header::VCF.Header, index::Integer)::Vector{String}
+    return genotype(record, header, index, format(record, header))
+end
+
+function genotype(record::Record, header::VCF.Header)::Vector{Vector{String}}
+    return genotype(record, header, :, format(record, header))
 end
 
 function gt(x::Int8)

@@ -37,7 +37,7 @@ function header(reader::Reader)
 end
 
 # VCF v4.3
-@info "Compiling VCF parser..."
+#@info "Compiling VCF parser..."
 const vcf_metainfo_machine, vcf_record_machine, vcf_header_machine, vcf_body_machine = let
     delim(x, sep) = opt(x * rep(sep * x))
 

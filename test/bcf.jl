@@ -63,6 +63,20 @@ end
     @test BCF.genotype(record, 2, 9) == [4,3]
     @test BCF.genotype(record, :, 9) == [[2,3],[4,3],[4,4]]
     @test occursin(r"^VariantCallFormat.BCF.Record:\n.*", repr(record))
+    # VCF-style access, must match the same record in data/VCF/example.vcf
+    let h = header(reader)
+        @test BCF.format(record, h) == ["GT", "GQ", "DP", "HQ"]
+        @test BCF.genotype(record, h) == [["0|0","48","1","51,51"], ["1|0","48","8","51,51"], ["1/1","43","5",".,."]]
+        @test BCF.genotype(record, h, 3) == ["1/1","43","5",".,."]
+        @test BCF.genotype(record, h, 2, "GT") == "1|0"
+        @test BCF.genotype(record, h, :, "GT") == ["0|0", "1|0", "1/1"]
+        @test BCF.genotype(record, h, 2:3, ["GT","DP"]) == [["1|0","8"], ["1/1","5"]]
+        @test BCF.genotype(record, h, 1, ["HQ","GT"]) == ["51,51", "0|0"]
+        @test_throws KeyError BCF.genotype(record, h, :, "BAD")
+        vcfs = collect(VCF.Reader(open(joinpath(@__DIR__, "data/VCF/example.vcf"))))
+        bcfs = [record; collect(reader)]
+        @test [BCF.genotype(r, h) for r in bcfs] == VCF.genotype.(vcfs)
+    end
     close(reader)
 
     # round-trip test
